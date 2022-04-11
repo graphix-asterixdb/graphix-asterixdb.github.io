@@ -1,1 +1,13 @@
-theme: jekyll-theme-cayman
+title: Graphix
+email: ggalvizo@uci.edu
+description: >-
+  Website for information around the Graphix project, an AsterixDB extension
+  that allows users to issue pattern matching and path finding queries on
+  conceptual graphs over existing AsterixDB data.
+baseurl: ""
+url: ""
+theme: just-the-docs
+remote_theme: just-the-docs/just-the-docs
+color_scheme: "graphix"
+search_enabled: true
+gh_edit_link: false
