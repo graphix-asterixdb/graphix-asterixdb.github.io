@@ -22,21 +22,33 @@ A _query_ can either be an expression (whose composition remains unchanged from 
 A _query block_ may contain several clauses, including `SELECT`, `FROM`, `LET`, `WHERE`, `GROUP BY`, and `HAVING`.
 The following productions are also unchanged from SQL++.
 
-Query <br>
-![Query Production](../../images/Query.png)
-{: .text-delta .code-example }
+* * * 
 
-Selection <br>
-![Selection](../../images/Selection.png)
-{: .text-delta .code-example }
+Query
+<p align="center">
+    <img src="../../images/Query.svg" />
+</p>
+{: .code-example }
 
-Query Block <br>
-![Query Block](../../images/QueryBlock.png)
-{: .text-delta .code-example }
+Selection
+<p align="center">
+    <img src="../../images/Selection.svg" />
+</p>
+{: .code-example }
 
-Stream Generator <br>
-![Stream Generator](../../images/StreamGenerator.png)
-{: .text-delta .code-example }
+Query Block
+<p align="center">
+    <img src="../../images/QueryBlock.svg" />
+</p>
+{: .code-example }
+
+Stream Generator
+<p align="center">
+    <img src="../../images/StreamGenerator.svg" />
+</p>
+{: .code-example }
+
+* * * 
 
 Similar to SQL++ (but unlike SQL), GSQL++ allows the `SELECT` clause to appear either at the beginning or the end of a query black.
 For some queries, placing the `SELECT` clause at the end may make a query block easier to understand because the `SELECT` clause refers to variables defined in the _stream generator_ production.

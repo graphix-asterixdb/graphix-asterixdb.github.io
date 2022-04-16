@@ -10,4 +10,6 @@ Gemfile
 Gemfile.lock
 
 # ...as well as our tools.
+.DS_Store
 tools/*
+!tools/bottlecaps.py

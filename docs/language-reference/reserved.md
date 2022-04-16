@@ -24,7 +24,7 @@ As a consequence, the following field names are reserved by Graphix and will be 
 
 ## Reserved Keywords
 The following keywords are reserved by both Graphix and SQL++, and cannot be used as unescaped identifiers.
-The keywords highlighted in bold are keywords introduced by Graphix:
+The keywords in bold are keywords introduced by Graphix:
 
 |-----------|-----------|-----------------|------------|------------|------------|
 | ADAPTER   | ALL       | AND             | ANY        | APPLY      | AS         |

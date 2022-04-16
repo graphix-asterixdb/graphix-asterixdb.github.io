@@ -38,7 +38,7 @@ Users can however use a GSQL++ query to locate record they want to delete.
 Suppose that we want to delete all users that have made reviews for a fake business.
 We can accomplish this deletion using a correlated sub-query:
 
-```
+```sql
 DELETE
 FROM    Users AS u
 WHERE   EXISTS (

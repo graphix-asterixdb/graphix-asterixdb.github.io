@@ -46,9 +46,9 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
 
 ## Building AsterixDB Datasets
 
-1. For our tutorial we use the "Gelp" example, where `Users` and their friends make `Reviews` about `Businesses`.
+1. For our tutorial we use the "Gelp" example, where **Users** and their friends make **Reviews** about **Businesses**.
     To start, let's create a new dataverse and all of the aforementioned entities as datasets.
-    ```
+    ```sql
     CREATE DATAVERSE  Gelp;
     USE               Gelp;
     
@@ -70,7 +70,7 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     In the example above, all three datasets only have their primary keys defined.
     All other fields associated with each entity exist as _open_ fields.
 2. Let's now insert some data into our dataverse. We'll start with our `Businesses` dataset.
-    ```
+    ```sql
     INSERT INTO   Gelp.Businesses [
         { "business_id": "B1", "name": "Papa's Supermarket", "number": "909-123-6123" },
         { "business_id": "B2", "name": "Mother's Gas Station", "number": "111-724-1123" },
@@ -80,7 +80,7 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     The three records inserted show two fields that were not defined in the `BusinessesType` data type: `name` and `number`.
     The last record illustrates the potential heterogenity enabled by AsterixDB's document data model, where some businesses may not have a number attached to them.
 3. Having populated our `Businesses` dataset, let's now move onto our `Users`:
-    ```
+    ```sql
     INSERT INTO   Gelp.Users [
         { "user_id": 1, "name": "Mary", "friends": [ 4, 5 ] },
         { "user_id": 2, "name": "John", "friends": [ 5 ] },
@@ -92,7 +92,7 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     A user may have a name and an array of `user_id` values denoting their friends.
     The potential `friends` array of a user depicts a common _denormalized_ form of modeling one-to-many relationships, again enabled by AsterixDB's document data model.
 4. Finally, let's move onto our last dataset: `Reviews`.
-    ```
+    ```sql
     INSERT INTO   Gelp.Reviews [
         { "review_id": "R1", "user_id": 1, "business_id": "B3", "review_time": date("2022-03-01") },
         { "review_id": "R2", "user_id": 5, "business_id": "B3", "review_time": date("2022-03-01") },
@@ -108,26 +108,70 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
 1. At this point, we have not gone over anything new (in the context of AsterixDB).
     We now have a logical data model for Gelp with three defined datasets: `Users`, `Reviews`, and `Businesses`.
     To iterate, these three datasets are used to model the following:
-    > _`Users` and their friends make `Reviews` about `Businesses`._
+
+    _**Users** and their friends make **Reviews** about **Businesses**._
+    {: .fw-400 .text-center }
 
     Graphically, we can represent this statement as follows:
-
-    ![Gelp Data Model](../images/GelpDataModel.svg)
+    
+    <p align="center">
+        <img src="../images/GelpDataModel.svg" />
+    </p>
     {: .code-example }
 
     We will now build a managed graph piece by piece.
     We start with a name for our graph: `GelpGraph`.
-    ```
+    ```sql
     CREATE  GRAPH GelpGraph
     AS      ... ;
     ```
 2. Now let us define our vertices.
-    As depicted in the diagram above, we have three types of vertices: _User_, _Review_, and _Business_.
+    As depicted in the diagram above, we have three types of vertices: **User**, **Review**, and **Business**.
+    In the context of the [Property Graph Model](../docs/data-model.html#property-graph-model), these vertex "types" will act as our vertex labels.
 
-    1. To align our diagram with the property graph model, the ca 
-3. With our vertices defined, we now will define our edges.
-4. When we put all these pieces together, we get the following:
+    1. Each vertex definition requires three pieces of information: the vertex _label_ the vertex _body_ and the vertex _key_.
+    The vertices of label `Business` are defined using the `Gelp.Businesses` dataset, where each record in `Gelp.Businesses` corresponds to a vertex in our graph.
+    The primary key of a `Business` vertex is the same as the logical primary key of its vertex body: `business_id`.
+    With these three pieces of information, we define the schema of a `Business` vertex in the `GelpGraph` as such:
+    ```sql
+    VERTEX           (:Business)
+    PRIMARY KEY      (business_id)
+    AS Gelp.Businesses
     ```
+    2. The vertices of label `User` are similarly defined using the `Gelp.Users` dataset, where each record in `Gelp.Users` corresponds to a vertex in our graph.
+    The primary key of a `User` vertex is again the same as the logical primary key of its vertex body: `user_id`.
+    We define the schema of a `User` vertex in the `GelpGraph` as such:
+    ```sql
+    VERTEX           (:User)
+    PRIMARY KEY      (user_id)
+    AS Gelp.Users
+    ```
+    3. We now move onto the last type of vertex: `Review`.
+    A vertex of label `Review` is defined using the `Gelp.Reviews` dataset, with the same primary key as its body: `review_id`.
+    Now suppose that we want to define `Review` vertices using `Gelp.Reviews` records that have a value for `review_time`.
+    The body of a vertex is similar to that of an AsterixDB view body: we could either use an existing dataset as the vertex body, or a more general _query_.
+    We will use the latter here for our `Review` vertex:
+    ```sql
+    VERTEX           (:Review)
+    PRIMARY KEY      (review_id)
+    AS ( 
+        FROM    Gelp.Reviews R
+        WHERE   R.review_time IS NOT UNKNOWN
+        SELECT  VALUE R
+    )
+    ```
+3. With our vertices defined, we now will define our edges.
+    Referencing our diagram above, we have three types of relationships between our vertices:
+    (1) _Reviews are **ABOUT** Businesses._
+    (2) _Reviews are **MADE_BY** Users._
+    (3) _Users are **FRIENDS_WITH** other Users._
+    These relationship "types" will act as our edge labels.
+
+    1. Each edge definition requires six pieces of information now: the source vertex _label_ and _key_, the destination vertex _label_ and _key_, the edge _label_, & the edge _body_. 
+    The edges of label `ABOUT`  
+
+4. When we put all these pieces together, we get the following:
+    ```sql
     CREATE  GRAPH GelpGraph
 
     AS      VERTEX           (:Business)
@@ -169,7 +213,7 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
 ## Querying our Graphix Graph
 1. Let's now query our data. Suppose that we want to find all businesses that users will go to with their friends.
     We can use the `review_time` from the `Reviews` dataset as a proxy for the "go to with" action, and formulate the following SQL++ query:
-    ```
+    ```sql
     FROM    Gelp.Users U,
             U.friends F,
             Gelp.Reviews R1,
