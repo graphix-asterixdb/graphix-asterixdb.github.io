@@ -129,7 +129,7 @@ Example
     ```json
     { "eLabel": "FRIENDS_WITH" }
     { "eLabel": "MADE_BY" }
-    { "eLabel": "MADE_FOR" }
+    { "eLabel": "ABOUT" }
     ```
 
 ## Path Functions

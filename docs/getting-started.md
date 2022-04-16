@@ -7,6 +7,8 @@ nav_order: 3
 # Getting Started
 {: .no_toc }
 
+In this tutorial, we are going to start a 1-node Graphix cluster, establish a collection of AsterixDB datasets, build a graph over these datasets, and query the graph we just built.
+
 ## Table of Contents
 {: .no_toc .text-delta }
 
@@ -42,15 +44,19 @@ nav_order: 3
     enabled=true
     ```
 
-## Building the Gelp Datasets
+## Building AsterixDB Datasets
 
-1. For our tutorial we use the "Gelp" example, where `Users` make `Reviews` about `Businesses`.
+1. For our tutorial we use the "Gelp" example, where `Users` and their friends make `Reviews` about `Businesses`.
     To start, let's create a new dataverse and all of the aforementioned entities as datasets.
     ```
-    DROP DATAVERSE    Gelp IF EXISTS;
     CREATE DATAVERSE  Gelp;
     USE               Gelp;
     
+    CREATE TYPE       BusinessesType
+    AS                { business_id : bigint };
+    CREATE DATASET    Businesses (BusinessesType)
+    PRIMARY KEY       business_id;
+
     CREATE TYPE       UsersType 
     AS                { user_id : bigint };
     CREATE DATASET    Users (UserType)
@@ -60,11 +66,6 @@ nav_order: 3
     AS                { review_id : string };
     CREATE DATASET    Reviews (ReviewsType)
     PRIMARY KEY       review_id;
-
-    CREATE TYPE       BusinessesType
-    AS                { business_id : bigint };
-    CREATE DATASET    Businesses (BusinessesType)
-    PRIMARY KEY       business_id;
     ```
     In the example above, all three datasets only have their primary keys defined.
     All other fields associated with each entity exist as _open_ fields.
@@ -96,16 +97,76 @@ nav_order: 3
         { "review_id": "R1", "user_id": 1, "business_id": "B3", "review_time": date("2022-03-01") },
         { "review_id": "R2", "user_id": 5, "business_id": "B3", "review_time": date("2022-03-01") },
         { "review_id": "R3", "user_id": 2, "business_id": "B1", "review_time": date("2022-03-02") },
-        { "review_id": "R4", "user_id": 5, "business_id": "B1", "review_time": date("2022-03-03") }
+        { "review_id": "R4", "user_id": 5, "business_id": "B1", "review_time": date("2022-03-03") },
+        { "review_id": "R5", "user_id": 5, "business_id": "B2" }
     ];
     ```
     A review may include an associated user, business, and review time.
 
-## Building the Gelp Graph
+## Defining a Graphix Graph
 
-1. We now have a logical data model for Gelp, with three defined datasets:  
+1. At this point, we have not gone over anything new (in the context of AsterixDB).
+    We now have a logical data model for Gelp with three defined datasets: `Users`, `Reviews`, and `Businesses`.
+    To iterate, these three datasets are used to model the following:
+    > _`Users` and their friends make `Reviews` about `Businesses`._
 
-## Querying our Gelp Graph
+    Graphically, we can represent this statement as follows:
+
+    ![Gelp Data Model](../images/GelpDataModel.svg)
+    {: .code-example }
+
+    We will now build a managed graph piece by piece.
+    We start with a name for our graph: `GelpGraph`.
+    ```
+    CREATE  GRAPH GelpGraph
+    AS      ... ;
+    ```
+2. Now let us define our vertices.
+    As depicted in the diagram above, we have three types of vertices: _User_, _Review_, and _Business_.
+
+    1. To align our diagram with the property graph model, the ca 
+3. With our vertices defined, we now will define our edges.
+4. When we put all these pieces together, we get the following:
+    ```
+    CREATE  GRAPH GelpGraph
+
+    AS      VERTEX           (:Business)
+            PRIMARY KEY      (business_id)
+            AS Gelp.Businesses,
+
+            VERTEX           (:User)
+            PRIMARY KEY      (user_id)
+            AS Gelp.Users,
+
+            VERTEX           (:Review)
+            PRIMARY KEY      (review_id)
+            AS ( FROM    Gelp.Reviews R
+                 WHERE   R.review_time IS NOT UNKNOWN
+                 SELECT  VALUE R ),
+            
+            EDGE             (:Review)-[:ABOUT]->(:Business)
+            SOURCE KEY       (review_id)
+            DESTINATION KEY  (business_id)
+            AS ( FROM    Gelp.Reviews R
+                 SELECT  VALUE R ),
+
+            EDGE             (:Review)-[:MADE_BY]->(:User)
+            SOURCE KEY       (review_id)
+            DESTINATION KEY  (user_id)
+            AS ( FROM    Gelp.Reviews R
+                 SELECT  VALUE R ),
+
+            EDGE             (:User)-[:FRIENDS_WITH]->(:User)
+            SOURCE KEY       (user_id)
+            DESTINATION KEY  (friend)
+            AS ( FROM    Gelp.Users U
+                 UNNEST  U.friends F
+                 SELECT  F AS friend,
+                         U.user_id );
+    ```
+
+
+## Querying our Graphix Graph
 1. Let's now query our data. Suppose that we want to find all businesses that users will go to with their friends.
     We can use the `review_time` from the `Reviews` dataset as a proxy for the "go to with" action, and formulate the following SQL++ query:
     ```
