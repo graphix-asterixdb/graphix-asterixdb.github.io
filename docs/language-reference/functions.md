@@ -27,7 +27,7 @@ Output
 : A `string` value.
 
 Example
-:   ```sql
+:   ```
     FROM    GRAPH GelpGraph
     MATCH   (n)
     SELECT  DISTINCT LABEL(n) AS nLabel;
@@ -49,7 +49,7 @@ Output
 : An `object` value.
 
 Example
-:   ```sql
+:   ```
     FROM    GRAPH GelpGraph
     MATCH   (n)
     SELECT  VALUE VERTEX_PROPERTIES(n)
@@ -71,7 +71,7 @@ Output
 : An `object` value.
 
 Example
-:   ```sql
+:   ```
     FROM    GRAPH GelpGraph
     MATCH   (n)
     SELECT  VALUE VERTEX_DETAIL(n)
@@ -96,7 +96,7 @@ Output
 : An `object` value.
 
 Example
-:   ```sql
+:   ```
     FROM    GRAPH GelpGraph
     MATCH   (n)
     SELECT  VALUE VERTEX_KEY(n)
@@ -120,7 +120,7 @@ Output
 : A `string` value.
 
 Example
-:   ```sql
+:   ```
     FROM    GRAPH GelpGraph
     MATCH   ( )-[e]-( )
     SELECT  DISTINCT LABEL(e) AS eLabel;
