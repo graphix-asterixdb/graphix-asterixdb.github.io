@@ -8,7 +8,7 @@ has_children: true
 # Language Reference
 
 The query language for Graphix (referred to as gSQL++) is intended to be a superset of AsterixDB's query language SQL++.
-gSQL++ was designed to "glue" the ASCII art syntax of graph patterns in languages like Cypher to SQL++.
+gSQL++ was designed to "glue" the ASCII art syntax of vertices, edges, and paths in languages like Cypher to SQL++.
 In doing so, existing users of not only AsterixDB but SQL as whole would be able to easily reason about gSQL++ queries.
 
 Readers should familarize themselves with the "Gelp" data model before proceeding.

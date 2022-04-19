@@ -319,11 +319,11 @@ Example
 
 ## Path Functions
 
-_Every function described in this section also applies to sub-paths, or paths that are defined using only the edge pattern production._
+_Every function described in this section also applies to sub-paths, or paths that are defined using only the EdgePattern production._
 
 ### PATH_HOP_COUNT (p)
 Retrieves the number of _valid_ hops in a given path.
-This function differs from taking the length of a path (i.e. `LEN (p)`) in that pseudo-path records (those that are produced for patterns without edges) do not contribute to this function's total hop count.
+This function differs from taking the length of a path (i.e. `LEN (p)`) in that pseudo-path records (those that are produced for paths without edges) do not contribute to this function's total hop count.
 
 Aliases
 : `HOP_COUNT (p)`, `EDGE_COUNT (p)`

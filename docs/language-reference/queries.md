@@ -64,17 +64,9 @@ For some queries, placing the `SELECT` clause at the end may make a query block 
 ## FROM Clause
 
 The purpose of a `FROM` clause is to iterate over a collection.
-An additional function of the `FROM` clause in gSQL++ is to introduce an iteration over collections of graph elements (vertices, edges, and paths) involved in mapping a graph query pattern (the `MATCH` clause) to a graph schema (an unmanaged `GraphConstructor` or a managed graph identified by its `QualifiedName`).
+An additional function of the `FROM` clause in gSQL++ is to introduce an iteration over collections of graph elements (vertices, edges, and paths) involved in mapping a conjunctive regular path expression (i.e. a navigational graph query pattern via the `MATCH` clause) to a graph schema (an unmanaged `GraphConstructor` or a managed graph identified by its `QualifiedName`).
 
 * * *
-
-Qualified Name
-{: .text-gamma .fw-500 .lh-0 }
-<p align="center">
-    <img src="../../images/QualifiedName.svg" />
-</p>
-{: .code-example }
-<br>
 
 FROM Clause
 {: .text-gamma .fw-500 .lh-0 }
@@ -84,7 +76,15 @@ FROM Clause
 {: .code-example }
 <br>
 
-Named Expression
+Qualified Name
+{: .text-gamma .fw-500 .lh-0 }
+<p align="center">
+    <img src="../../images/QualifiedName.svg" />
+</p>
+{: .code-example }
+<br>
+
+Named Expression (NamedExpr)
 {: .text-gamma .fw-500 .lh-0 }
 <p align="center">
     <img src="../../images/NamedExpr.svg" />
@@ -124,8 +124,97 @@ MATCH   (u1:User)-[:FRIENDS_WITH]->(u2:User)
 SELECT  u1, u2;
 ```
 
+To query over an unmanged graph, users can specify a `GraphConstructor` expression in lieu of the named of a managed graph:
+```
+FROM    GRAPH AS
+
+  VERTEX       (:User)
+  PRIMARY KEY      (user_id)
+  AS Gelp.Users,
+
+  EDGE             (:User)-[:FRIENDS_WITH]->(:User)
+  SOURCE KEY       (user_id)
+  DESTINATION KEY  (friend)
+  AS ( FROM   Gelp.Users U
+       UNNEST  U.friends F
+       SELECT  F AS friend,
+               U.user_id )
+
+MATCH   (u1:User)-[:FRIENDS_WITH]->(u2:User)
+SELECT  u1, u2;
+```
 
 ## MATCH Clause
+
+The purpose of a `MATCH` clause is to specify a graph pattern (potentially with navigational features) 
+
+* * *
+
+MATCH Clause
+{: .text-gamma .fw-500 .lh-0 }
+<p align="center">
+    <img src="../../images/MatchClause.svg" />
+</p>
+{: .code-example }
+<br>
+
+MATCH Expression (MatchExpr)
+{: .text-gamma .fw-500 .lh-0 }
+<p align="center">
+    <img src="../../images/MatchExpr.svg" />
+</p>
+{: .code-example }
+<br>
+
+MATCH Step
+{: .text-gamma .fw-500 .lh-0 }
+<p align="center">
+    <img src="../../images/MatchStep.svg" />
+</p>
+{: .code-example }
+<br>
+
+Pattern Expression (PatternExpr)
+{: .text-gamma .fw-500 .lh-0 }
+<p align="center">
+    <img src="../../images/PatternExpr.svg" />
+</p>
+{: .code-example }
+<br>
+
+Vertex Pattern
+{: .text-gamma .fw-500 .lh-0 }
+<p align="center">
+    <img src="../../images/VertexPattern.svg" />
+</p>
+{: .code-example }
+<br>
+
+Edge Pattern
+{: .text-gamma .fw-500 .lh-0 }
+<p align="center">
+    <img src="../../images/EdgePattern.svg" />
+</p>
+{: .code-example }
+<br>
+
+Edge Detail
+{: .text-gamma .fw-500 .lh-0 }
+<p align="center">
+    <img src="../../images/EdgeDetail.svg" />
+</p>
+{: .code-example }
+<br>
+
+Repetition Quantifier
+{: .text-gamma .fw-500 .lh-0 }
+<p align="center">
+    <img src="../../images/RepetitionQuantifier.svg" />
+</p>
+{: .code-example }
+
+* * *
+
 
 
 ## LET Clause

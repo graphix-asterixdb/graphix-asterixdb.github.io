@@ -192,13 +192,15 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
             SOURCE KEY       (review_id)
             DESTINATION KEY  (business_id)
             AS ( FROM    Gelp.Reviews R
-                 SELECT  VALUE R ),
+                 SELECT  R.review_id,
+                         R.business_id ),
 
             EDGE             (:Review)-[:MADE_BY]->(:User)
             SOURCE KEY       (review_id)
             DESTINATION KEY  (user_id)
             AS ( FROM    Gelp.Reviews R
-                 SELECT  VALUE R ),
+                 SELECT  R.review_id,
+                         R.user_id ),
 
             EDGE             (:User)-[:FRIENDS_WITH]->(:User)
             SOURCE KEY       (user_id)
