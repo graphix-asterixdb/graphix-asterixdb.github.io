@@ -168,8 +168,49 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     These relationship "types" will act as our edge labels.
 
     1. Each edge definition requires six pieces of information now: the source vertex _label_ and _key_, the destination vertex _label_ and _key_, the edge _label_, & the edge _body_. 
-    The edges of label `ABOUT`  
-
+    The edges of label `ABOUT` have source vertices of the label `Review` and destination vertices of the label `Business`. 
+    The edge bodies of label `ABOUT` are defined using <u>query</u> that references the `Gelp.Reviews` dataset.
+    The goal of this edge body is to specify i) a field that will be used to connect (or `JOIN`) the edge body to the source label (i.e. our source key), ii) a field that will be used to connect the edge body to the destination label (i.e. our destination key), and iii) any edge properties.
+    With these six pieces of information, we define the schema of an `ABOUT` edge in the `GelpGraph` as such:
+    ```
+    EDGE             (:Review)-[:ABOUT]->(:Business)
+    SOURCE KEY       (source_review_id)
+    DESTINATION KEY  (dest_business_id)
+    AS ( FROM    Gelp.Reviews R
+         WHERE   R.review_time IS NOT UNKNOWN
+         SELECT  R.review_id AS source_review_id,
+                 R.business_id AS dest_business_id )
+    ```
+    The fact that our edge body shares a `FROM` clause with the vertex body for `Review` illustrates a trait of our underlying datasets: the `Reviews` dataset has an embedded 1:N relationship with our `Businesses` dataset.
+    For those familiar with translating Entity-Relationship diagrams into SQL tables, the purpose of an edge body is to specify a _relationship table_ that holds foreign key references to two other tables (in our case, vertices).
+    2. The edges of label `MADE_BY` are similarly defined to edges of label `ABOUT`.
+    `MADE_BY` edges have source vertices of the label `Review` and destination vertices of the label `User`.
+    Of our edge body, the key used to connect our edge to `Review` vertices is `(source_review_id)`.
+    The key used to connect our edge to `User` vertices is `(dest_user_id)`.
+    We define the schema of a `MADE_BY` edge in the `GelpGraph` as such:
+    ```
+    EDGE             (:Review)-[:MADE_BY]->(:User)
+    SOURCE KEY       (source_review_id)
+    DESTINATION KEY  (dest_user_id)
+    AS ( FROM    Gelp.Reviews R
+         WHERE   R.review_time IS NOT UNKNOWN
+         SELECT  R.review_id AS source_review_id,
+                 R.user_id AS dest_user_id )
+    ```
+    3. The edges of label `FRIENDS_WITH` have source vertices of label `User` and destination vertices of the label `User`.
+    The edge bodies are defined using an `UNNEST` query of the `Gelp.Users` dataset.
+    Of our edge body, the key used to connect our edge to our source `User` vertex is `(source_user_id)`.
+    The key used to connect our edge to our destination `User` vertex is `(dest_friend)`.
+    We define the schema of a `FRIENDS_WITH` edge in the `GelpGraph` as such:
+    ```
+    EDGE             (:User)-[:FRIENDS_WITH]->(:User)
+    SOURCE KEY       (source_user_id)
+    DESTINATION KEY  (dest_friend)
+    AS ( FROM    Gelp.Users U
+         UNNEST  U.friends F
+         SELECT  F AS dest_friend,
+                 U.user_id AS source_user_id )
+    ```
 4. When we put all these pieces together, we get the following:
     ```
     CREATE  GRAPH GelpGraph
@@ -189,32 +230,35 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
                  SELECT  VALUE R ),
             
             EDGE             (:Review)-[:ABOUT]->(:Business)
-            SOURCE KEY       (review_id)
-            DESTINATION KEY  (business_id)
+            SOURCE KEY       (source_review_id)
+            DESTINATION KEY  (dest_business_id)
             AS ( FROM    Gelp.Reviews R
-                 SELECT  R.review_id,
-                         R.business_id ),
+                 WHERE   R.review_time IS NOT UNKNOWN
+                 SELECT  R.review_id AS source_review_id,
+                         R.business_id AS dest_business_id ),
 
             EDGE             (:Review)-[:MADE_BY]->(:User)
-            SOURCE KEY       (review_id)
-            DESTINATION KEY  (user_id)
+            SOURCE KEY       (source_review_id)
+            DESTINATION KEY  (dest_user_id)
             AS ( FROM    Gelp.Reviews R
-                 SELECT  R.review_id,
-                         R.user_id ),
+                 WHERE   R.review_time IS NOT UNKNOWN
+                 SELECT  R.review_id AS source_review_id,
+                         R.user_id AS dest_user_id ),
 
             EDGE             (:User)-[:FRIENDS_WITH]->(:User)
-            SOURCE KEY       (user_id)
-            DESTINATION KEY  (friend)
+            SOURCE KEY       (source_user_id)
+            DESTINATION KEY  (dest_friend)
             AS ( FROM    Gelp.Users U
                  UNNEST  U.friends F
-                 SELECT  F AS friend,
-                         U.user_id );
+                 SELECT  F AS dest_friend,
+                         U.user_id AS source_review_id );
     ```
+    Issuing the statement above will create a managed graph in Graphix.
 
 
 ## Querying our Graphix Graph
-1. Let's now query our data. Suppose that we want to find all businesses that users will go to with their friends.
-    We can use the `review_time` from the `Reviews` dataset as a proxy for the "go to with" action, and formulate the following ++ query:
+1. Let's now query our data. Suppose that we want to find all businesses that users have gone to with their friends.
+    We can use the `review_time` from the `Reviews` dataset as a proxy for the "gone to with" action, and formulate the following SQL++ query:
     ```
     FROM    Gelp.Users U,
             U.friends F,
@@ -227,6 +271,20 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
             R2.business_id = B.business_id AND
             R1.review_time = R2.review_time
     SELECT  DISTINCT VALUE B;
+    ```
+    `Gelp.Users` records are first `UNNEST`ed to get their friends, assigned variables of `U` and `F` respectively.
+    `Gelp.Reviews` is then `JOIN`ed with `U` and `F` separately to get the reviews of user `U` and the reviews of user `F` (assigned variables of `R1` and `R2` respectively).
+    `Gelp.Businesses` is then `JOIN`ed with the reviews of our user `U` and the reviews of our user `F`.
+    Finally, we perform a `JOIN` between both reviews on their `review_time` field. 
+    Let's now write this query against our newly specified `GelpGraph`:
+    ```
+    FROM    GRAPH GelpGraph
+    MATCH   (u:User)-[:FRIENDS_WITH]->(f:User),
+            (u)<-[:MADE_BY]-(ru:Review),
+            (f)<-[:MADE_BY]-(rf:Review),
+            (ru)-[:ABOUT]->(b:Business)<-[:ABOUT]-(rf)
+    WHERE   ru.review_time = rf.review_time
+    SELECT  DISTINCT VALUE b;
     ```
 
 ## Stopping our Sample Cluster

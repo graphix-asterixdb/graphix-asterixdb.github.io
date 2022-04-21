@@ -61,6 +61,7 @@ Similar to SQL++ (but unlike SQL), gSQL++ allows the `SELECT` clause to appear e
 For some queries, placing the `SELECT` clause at the end may make a query block easier to understand because the `SELECT` clause refers to variables defined in the _stream generator_ production.
 
 
+
 ## FROM Clause
 
 The purpose of a `FROM` clause is to iterate over a collection.
@@ -128,7 +129,7 @@ To query over an unmanged graph, users can specify a `GraphConstructor` expressi
 ```
 FROM    GRAPH AS
 
-  VERTEX       (:User)
+  VERTEX           (:User)
   PRIMARY KEY      (user_id)
   AS Gelp.Users,
 
@@ -144,9 +145,17 @@ MATCH   (u1:User)-[:FRIENDS_WITH]->(u2:User)
 SELECT  u1, u2;
 ```
 
+In contrast to SQL++ (and SQL), gSQL++ does **not** support implicit iteration variables when the source `FromClause` is iterating over a collection of `MATCH` to graph schema mappings.
+Putting aside the good practice of specifying explicit iteration variables in SQL++ aside, the problem of specifying graph query patterns in nearly all non-trivial use cases involve describing more than one graph element.
+This multi-element describing domain of gSQL++ is what 
+, rendering  hence the need for explicit iteration variables  
+For example, the following query would raise an "ambiguous reference" error:
+```
+
+
 ## MATCH Clause
 
-The purpose of a `MATCH` clause is to specify a graph pattern (potentially with navigational features) 
+The purpose of a `MATCH` clause is to specify a (potentially navigational) graph pattern.
 
 * * *
 
@@ -214,6 +223,7 @@ Repetition Quantifier
 {: .code-example }
 
 * * *
+
 
 
 
