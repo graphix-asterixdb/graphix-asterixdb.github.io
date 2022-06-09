@@ -17,6 +17,7 @@ nav_order: 3
 
 * * *
 
+
 ## Vertex Functions
 
 ### LABEL (v)
@@ -42,27 +43,6 @@ Example
     { "nLabel": "Business" }
     ```
 
-### VERTEX_PROPERTIES (v)
-Retrieves the vertex properties (i.e. the vertex body) associated with the vertex.
-
-Input
-: A vertex variable.
-
-Output
-: An `object` value.
-
-Example
-:   ```
-    FROM    GRAPH GelpGraph
-    MATCH   (v)
-    SELECT  VALUE VERTEX_PROPERTIES(n)
-    LIMIT   1;
-    ```
-    Returns the following:
-    ```json
-    { "user_id": 1, "name": "Mary", "friends": [ 4, 5 ] }
-    ```
-
 ### VERTEX_DETAIL (v)
 Retrieves the Graphix-internal information associated with the vertex.
 This does not include the properties of the vertex.
@@ -83,31 +63,9 @@ Example
     Returns the following:
     ```json
     {
-      "_GraphixElementDetail": { "Label": "User" },
-      "_GraphixVertexDetail": { "PrimaryKey": { "user_id": 1 } }
+      "Label": "User",
+      "PrimaryKey": { "user_id": 1 }
     }
-    ```
-
-### VERTEX_KEY (v)
-Retrieves the primary key value(s) associated with the _vertex_.
-The usage of "primary key" here refers to the primary key defined on the vertex itself, not the underlying dataset (if any).
-
-Input
-: A vertex variable.
-
-Output
-: An `object` value.
-
-Example
-:   ```
-    FROM    GRAPH GelpGraph
-    MATCH   (v)
-    SELECT  VALUE VERTEX_KEY(v)
-    LIMIT   1;
-    ```
-    Returns the following:
-    ```json
-    { "user_id": 1 }
     ```
 
 * * *
@@ -137,27 +95,6 @@ Example
     { "eLabel": "ABOUT" }
     ```
 
-### EDGE_PROPERTIES (e)
-Retrieves the edge properties (i.e. the edge body) associated with the edge.
-
-Input
-: An edge variable.
-
-Output
-: An `object` value.
-
-Example
-:   ```
-    FROM    GRAPH GelpGraph
-    MATCH   ( )-[e]-( )
-    SELECT  VALUE EDGE_PROPERTIES(e)
-    LIMIT   1;
-    ```
-    Returns the following:
-    ```json
-    { "review_id": "R1", "business_id": "B3" }
-    ```
-
 ### EDGE_DETAIL (e)
 Retrieves the Graphix-internal information associated with the edge.
 This does not include the properties of the edge.
@@ -178,12 +115,10 @@ Example
     Returns the following:
     ```json
     {
-      "_GraphixElementDetail": { "Label": "ABOUT" },
-      "_GraphixEdgeDetail": {
-        "EdgeDirection": "LEFT_TO_RIGHT",
-        "SourceKey": { "review_id": "R1" },
-        "DestinationKey": { "business_id": "B3" }
-      }
+      "Label": "ABOUT",
+      "EdgeDirection": "LEFT_TO_RIGHT",
+      "SourceKey": { "review_id": "R1" },
+      "DestinationKey": { "business_id": "B3" }
     }
     ```
 
@@ -215,104 +150,54 @@ Example
     { "v1Label": "Review", "v2Label": "Business", "eDirection": "LEFT_TO_RIGHT" }
     ```
 
-### EDGE_SOURCE_KEY (e)
-Retrieves the foreign key value(s) of an edge's body that is used to reference its _source_ vertex.
+### EDGE_SOURCE_VERTEX (e)
+Retrieve the source vertex associated with the edge.
+This function does **not** work on path variables.
 
 Aliases
-: `SOURCE_KEY (e)`
+: `SOURCE_VERTEX (e)`
 
 Input
 : An edge variable.
 
 Output
-: An `object` value.
+: A vertex value.
 
 Example
 :   ```
     FROM    GRAPH GelpGraph
-    MATCH   (:Review)-[e:ABOUT]->(:Business)
-    SELECT  VALUE EDGE_SOURCE_KEY(e)
-    LIMIT   1;
+    MATCH   (x1)-[e]-(x2)
+    SELECT  DISTINCT LABEL(EDGE_SOURCE_VERTEX(e)) AS sourceVertexLabel;
     ```
     Returns the following:
     ```json
-    { "review_id": "R1" }
+    { "sourceVertexLabel": "Review" }
+    { "sourceVertexLabel": "User" }
     ```
 
-### EDGE_DEST_KEY (e)
-Retrieves the foreign key value(s) of an edge's body that is used to reference its _destination_ vertex.
+### EDGE_DEST_VERTEX (e)
+Retrieve the destination vertex associated with the edge.
+This function does **not** work on path variables.
 
 Aliases
-: `EDGE_DESTINATION_KEY (e)`, `DEST_KEY (e)`, `DESTINATION_KEY (e)`
+: `EDGE_DESTINATION_VERTEX (e)`, `DESTINATION_VERTEX (e)`, `DEST_VERTEX (e)`
 
 Input
 : An edge variable.
 
 Output
-: An `object` value.
-
-Example
-:   ```
-    FROM    GRAPH GelpGraph
-    MATCH   (:Review)-[e:ABOUT]->(:Business)
-    SELECT  VALUE EDGE_DEST_KEY(e)
-    LIMIT   1;
-    ```
-    Returns the following:
-    ```json
-    { "business_id": "B3" }
-    ```
-
-### EDGE_IF_LEFT_TO_RIGHT (e, x1, x2)
-Conditions on the edge direction of `e` and returns `x1` if `e` is directed from left to right, and `x2` if `e` is directed from right to left.
-Users can leverage this function to retrieve the source vertex of an edge, as shown in the example.
-
-Aliases
-: `LEFT_TO_RIGHT_IF (e, x1, x2)`
-
-Input
-: An edge variable `e`, and two expressions `x1` and `x2`.
-
-Output
-: The inputs `x1` or `x2`.
+: A vertex value.
 
 Example
 :   ```
     FROM    GRAPH GelpGraph
     MATCH   (x1)-[e]-(x2)
-    LET     sourceVertex = EDGE_LEFT_TO_RIGHT_IF(e, x1, x2)
-    SELECT  DISTINCT VALUE LABEL(sourceVertex) AS sourceVertex;
+    SELECT  DISTINCT LABEL(EDGE_DEST_VERTEX(e)) AS destVertexLabel;
     ```
     Returns the following:
     ```json
-    { "sourceVertex": "Review" }
-    { "sourceVertex": "User" }
-    ```
-
-### EDGE_IF_RIGHT_TO_LEFT (e, x1, x2)
-Conditions on the edge direction of `e` and returns `x1` if `e` is directed from right to left, and `x2` if `e` is directed from left to right.
-Users can leverage this function to retrieve the destination vertex of an edge, as shown in the example.
-
-Aliases
-: `RIGHT_TO_LEFT_IF (e, x1, x2)`
-
-Input
-: An edge variable `e`, and two expressions `x1` and `x2`.
-
-Output
-: The inputs `x1` or `x2`.
-
-Example
-:   ```
-    FROM    GRAPH GelpGraph
-    MATCH   (x1)-[e]-(x2)
-    LET     destVertex = EDGE_RIGHT_TO_LEFT_IF(e, x1, x2)
-    SELECT  DISTINCT VALUE LABEL(destVertex) AS destVertex;
-    ```
-    Returns the following:
-    ```json
-    { "destVertex": "Business" }
-    { "destVertex": "User" }
+    { "destVertexLabel": "Review" }
+    { "destVertexLabel": "User" }
     ```
 
 * * *
@@ -322,8 +207,7 @@ Example
 _Every function described in this section also applies to sub-paths, or paths that are defined using only the EdgePattern production._
 
 ### PATH_HOP_COUNT (p)
-Retrieves the number of _valid_ hops in a given path.
-This function differs from taking the length of a path (i.e. `LEN (p)`) in that pseudo-path records (those that are produced for paths without edges) do not contribute to this function's total hop count.
+Retrieves the number of edges in a given path.
 
 Aliases
 : `HOP_COUNT (p)`, `EDGE_COUNT (p)`
@@ -347,31 +231,6 @@ Example
     Returns the following:
     ```json
     { "count1": [ 0 ], "count2": [ 1, 2 ] }
-    ```
-
-### PATH_LABELS (p)
-Retrives all unique vertex and edge labels found in a given path.
-
-Aliases
-: `LABELS (p)`
-
-Input
-: A path variable.
-
-Output
-: An ordered list of `string` values.
-
-Example
-:   ```
-    FROM    GRAPH GelpGraph
-    MATCH   (x1)-[e]-(x2) AS p
-    SELECT  DISTINCT VALUE PATH_LABELS(p)
-    LIMIT   2;
-    ```
-    Returns the following:
-    ```json
-    [ "User", "FRIENDS_WITH", "User" ]
-    [ "User", "MADE_BY", "Review" ]
     ```
 
 ### PATH_VERTICES (p)

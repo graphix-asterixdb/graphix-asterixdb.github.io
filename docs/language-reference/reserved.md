@@ -17,10 +17,7 @@ nav_order: 1000
 
 ## Reserved Field Names
 During compilation, Graphix must attach graph-specific schema information to each vertex and edge body.
-As a consequence, the following field names are reserved by Graphix and the Graphix-generated values will take precedence if a conflict is found:
-1. `_GraphixElementDetail` (holds vertex and edge label values)
-2. `_GraphixVertexDetail` (holds vertex keys)
-3. `_GraphixEdgeDetail` (holds edge direction and keys)
+As a consequence, the field name `_GraphixSchemaDetail` is reserved by Graphix and an error will be raised if a conflict is found.
 
 ## Reserved Keywords
 The following keywords are reserved by both Graphix and SQL++, and cannot be used as unescaped identifiers.

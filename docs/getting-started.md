@@ -127,7 +127,7 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     ```
 2. Now let us define our vertices.
     As depicted in the diagram above, we have three types of vertices: **User**, **Review**, and **Business**.
-    In the context of the [Property Graph Model](../docs/data-model.html#property-graph-model), these vertex "types" will act as our vertex labels.
+    In the context of the [Property Graph Model](../docs/query-model.html#property-graph-model), these vertex "types" will act as our vertex labels.
 
     1. Each vertex definition requires three pieces of information: the vertex _label_ the vertex _body_ and the vertex _key_.
     The vertices of label `Business` are defined using the `Gelp.Businesses` dataset, where each record in `Gelp.Businesses` corresponds to a vertex in our graph.
@@ -155,9 +155,9 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     VERTEX           (:Review)
     PRIMARY KEY      (review_id)
     AS ( 
-        FROM    Gelp.Reviews R
-        WHERE   R.review_time IS NOT UNKNOWN
-        SELECT  VALUE R
+         FROM    Gelp.Reviews R
+         WHERE   R.review_time IS NOT UNKNOWN
+         SELECT  VALUE R
     )
     ```
 3. With our vertices defined, we now will define our edges.
@@ -174,42 +174,48 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     With these six pieces of information, we define the schema of an `ABOUT` edge in the `GelpGraph` as such:
     ```
     EDGE             (:Review)-[:ABOUT]->(:Business)
-    SOURCE KEY       (source_review_id)
-    DESTINATION KEY  (dest_business_id)
-    AS ( FROM    Gelp.Reviews R
+    SOURCE KEY       (review_id)
+    DESTINATION KEY  (business_id)
+    AS (
+         FROM    Gelp.Reviews R
          WHERE   R.review_time IS NOT UNKNOWN
-         SELECT  R.review_id AS source_review_id,
-                 R.business_id AS dest_business_id )
+         SELECT  R.review_id,
+                 R.business_id
+    ) 
     ```
     The fact that our edge body shares a `FROM` clause with the vertex body for `Review` illustrates a trait of our underlying datasets: the `Reviews` dataset has an embedded 1:N relationship with our `Businesses` dataset.
     For those familiar with translating Entity-Relationship diagrams into SQL tables, the purpose of an edge body is to specify a _relationship table_ that holds foreign key references to two other tables (in our case, vertices).
     2. The edges of label `MADE_BY` are similarly defined to edges of label `ABOUT`.
     `MADE_BY` edges have source vertices of the label `Review` and destination vertices of the label `User`.
-    Of our edge body, the key used to connect our edge to `Review` vertices is `(source_review_id)`.
-    The key used to connect our edge to `User` vertices is `(dest_user_id)`.
+    Of our edge body, the key used to connect our edge to `Review` vertices is `(review_id)`.
+    The key used to connect our edge to `User` vertices is `(user_id)`.
     We define the schema of a `MADE_BY` edge in the `GelpGraph` as such:
     ```
     EDGE             (:Review)-[:MADE_BY]->(:User)
-    SOURCE KEY       (source_review_id)
-    DESTINATION KEY  (dest_user_id)
-    AS ( FROM    Gelp.Reviews R
+    SOURCE KEY       (review_id)
+    DESTINATION KEY  (user_id)
+    AS (
+         FROM    Gelp.Reviews R
          WHERE   R.review_time IS NOT UNKNOWN
-         SELECT  R.review_id AS source_review_id,
-                 R.user_id AS dest_user_id )
+         SELECT  R.review_id AS review_id,
+                 R.user_id AS user_id
+    )
     ```
     3. The edges of label `FRIENDS_WITH` have source vertices of label `User` and destination vertices of the label `User`.
     The edge bodies are defined using an `UNNEST` query of the `Gelp.Users` dataset.
-    Of our edge body, the key used to connect our edge to our source `User` vertex is `(source_user_id)`.
-    The key used to connect our edge to our destination `User` vertex is `(dest_friend)`.
+    Of our edge body, the key used to connect our edge to our source `User` vertex is `(user_id)`.
+    The key used to connect our edge to our destination `User` vertex is `(friend)`.
     We define the schema of a `FRIENDS_WITH` edge in the `GelpGraph` as such:
     ```
     EDGE             (:User)-[:FRIENDS_WITH]->(:User)
-    SOURCE KEY       (source_user_id)
-    DESTINATION KEY  (dest_friend)
-    AS ( FROM    Gelp.Users U
+    SOURCE KEY       (user_id)
+    DESTINATION KEY  (friend)
+    AS (
+         FROM    Gelp.Users U
          UNNEST  U.friends F
-         SELECT  F AS dest_friend,
-                 U.user_id AS source_user_id )
+         SELECT  F AS friend,
+                 U.user_id
+    )
     ```
 4. When we put all these pieces together, we get the following:
     ```
@@ -230,62 +236,114 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
                  SELECT  VALUE R ),
             
             EDGE             (:Review)-[:ABOUT]->(:Business)
-            SOURCE KEY       (source_review_id)
-            DESTINATION KEY  (dest_business_id)
+            SOURCE KEY       (review_id)
+            DESTINATION KEY  (business_id)
             AS ( FROM    Gelp.Reviews R
                  WHERE   R.review_time IS NOT UNKNOWN
-                 SELECT  R.review_id AS source_review_id,
-                         R.business_id AS dest_business_id ),
+                 SELECT  R.review_id,
+                         R.business_id ),
 
             EDGE             (:Review)-[:MADE_BY]->(:User)
-            SOURCE KEY       (source_review_id)
-            DESTINATION KEY  (dest_user_id)
+            SOURCE KEY       (review_id)
+            DESTINATION KEY  (user_id)
             AS ( FROM    Gelp.Reviews R
                  WHERE   R.review_time IS NOT UNKNOWN
-                 SELECT  R.review_id AS source_review_id,
-                         R.user_id AS dest_user_id ),
+                 SELECT  R.review_id,
+                         R.user_id ),
 
             EDGE             (:User)-[:FRIENDS_WITH]->(:User)
-            SOURCE KEY       (source_user_id)
-            DESTINATION KEY  (dest_friend)
+            SOURCE KEY       (user_id)
+            DESTINATION KEY  (friend)
             AS ( FROM    Gelp.Users U
                  UNNEST  U.friends F
-                 SELECT  F AS dest_friend,
-                         U.user_id AS source_review_id );
+                 SELECT  F AS friend
+                         U.user_id );
     ```
     Issuing the statement above will create a managed graph in Graphix.
 
 
 ## Querying our Graphix Graph
-1. Let's now query our data. Suppose that we want to find all businesses that users have gone to with their friends.
-    We can use the `review_time` from the `Reviews` dataset as a proxy for the "gone to with" action, and formulate the following SQL++ query:
-    ```
-    FROM    Gelp.Users U,
-            U.friends F,
-            Gelp.Reviews R1,
-            Gelp.Reviews R2,
-            Gelp.Businesses B
-    WHERE   R1.user_id = U.user_id AND 
-            R2.user_id = F AND
-            R1.business_id = B.business_id AND
-            R2.business_id = B.business_id AND
-            R1.review_time = R2.review_time
-    SELECT  DISTINCT VALUE B;
-    ```
-    `Gelp.Users` records are first `UNNEST`ed to get their friends, assigned variables of `U` and `F` respectively.
-    `Gelp.Reviews` is then `JOIN`ed with `U` and `F` separately to get the reviews of user `U` and the reviews of user `F` (assigned variables of `R1` and `R2` respectively).
-    `Gelp.Businesses` is then `JOIN`ed with the reviews of our user `U` and the reviews of our user `F`.
-    Finally, we perform a `JOIN` between both reviews on their `review_time` field. 
-    Let's now write this query against our newly specified `GelpGraph`:
+1. Let's now query our data.
+    To start, let's see what our `Business` vertices look like.
+    We build the following gSQL++ query:
     ```
     FROM    GRAPH GelpGraph
-    MATCH   (u:User)-[:FRIENDS_WITH]->(f:User),
-            (u)<-[:MADE_BY]-(ru:Review),
-            (f)<-[:MADE_BY]-(rf:Review),
-            (ru)-[:ABOUT]->(b:Business)<-[:ABOUT]-(rf)
-    WHERE   ru.review_time = rf.review_time
-    SELECT  DISTINCT VALUE b;
+    MATCH   (b:Business)
+    SELECT  b;
     ```
+    The query above starts by specifying the graph we are querying (the `FROM GRAPH GelpGraph` line), followed by a graph pattern consisting of a single vertex whose label is to `Business`, concluding with a `SELECT` clause containing the variable of our vertex.
+    For a more in-depth explanation on what a graph pattern is, see the [Graphix Query Model](../docs/query-model.html) page.
+    If we issue our query, we get the following results:
+    ```json
+    { "business_id": "B1", "name": "Papa's Supermarket", "number": "909-123-6123" }
+    { "business_id": "B2", "name": "Mother's Gas Station", "number": "111-724-1123" }
+    { "business_id": "B3", "name": "Uncle's Bakery" }
+    ```
+    Our results are all records from the `Businesses` dataset, which makes sense given how we defined a `Business` vertex in our graph.
+
+2. Let's now see what an edge looks like.
+    In particular, let's see what all `ABOUT` edges return.
+    We build the following gSQL++ query:
+    ```
+    FROM    GRAPH GelpGraph
+    MATCH   (:Review)-[a:ABOUT]->(:Business)
+    SELECT  a;
+    ```
+    Issuing the query above yields the following results:
+    ```json
+    { "review_id": "R1", "business_id": "B3" }
+    { "review_id": "R2", "business_id": "B3" }
+    { "review_id": "R3", "business_id": "B1" }
+    { "review_id": "R4", "business_id": "B1" }
+    ```
+    In contrast to our `Business` vertices, our `Review` vertices and all connecting edges filter out records from the `Reviews` dataset if their `review_time` field is `NULL` or `MISSING`.
+    The query being executed by AsterixDB is analogous to the following SQL++ query:
+    ```
+    FROM    Yelp.Reviews R,
+            Yelp.Businesses B
+    WHERE   R.business_id = B.business_id
+    SELECT  { "review_id": R.review_id, "business_id": R.business_id } AS a;
+    ```
+
+3. Suppose that we now want to find whether or not two users are connected by some number of friends in our graph.
+    In this scenario, we need to describe a _path_ between two vertices instead of an edge.
+    We build the following gSQL++ query:
+    ```
+    FROM    GRAPH GelpGraph
+    MATCH   (u1:User)-[f:FRIENDS_WITH{1,4}]-(u2:User)
+    LET     vertices = PATH_VERTICES(f),
+            edges = PATH_EDGES(f)
+    SELECT  u1, u2, vertices, edges;
+    ```
+    Issuing the query above yields the following results:
+    ```json
+    TODO
+    ```
+    The query above illustrates a _navigational graph pattern_, where `f` corresponds to a path instead of an edge.
+    Vertices of path are accessed using the `PATH_VERTICES` function, and edges of a path are accessed using the `PATH_EDGES` function.
+    Graphix currently requires a limit on the number of hops in the path, but we are working on an unbounded navigational query pattern solution.
+   
+4. Let's expand on the previous scenario: suppose we are not interested in multiple paths between the same two users, but instead we are interested in the _shortest_ path.
+    We build the following gSQL++ query, taking advantage of how SQL++ treats grouping:
+    ```
+    FROM      GRAPH GelpGraph
+    MATCH     (u1:User)-[f:FRIENDS_WITH{1,4}]-(u2:User)
+    GROUP BY  u1, u2
+    GROUP AS  g
+    LET       shortestPath = (
+        FROM     g
+        SELECT   g.p
+        ORDER BY PATH_HOP_COUNT(p) ASC
+        LIMIT    1
+    )
+    SELECT    u1, u2, shortestPath;
+    ```
+    Issuing the query above yields the following results:
+    ```json
+    TODO
+    ```
+    The query above can be thought of as grouping all distinct pairs of users `u1` and `u2`, then fetching the path out of all paths between `u1` and `u2` that has the shortest length.
+    The ability to operate on groups using subqueries in SQL++ allows gSQL++ to be express a numerous amount of typical path finding problems (e.g. weighted shortest paths).
 
 ## Stopping our Sample Cluster
 
