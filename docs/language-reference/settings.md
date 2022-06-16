@@ -78,10 +78,10 @@ Example
       WITH        `GGV_4` = ( { "user_id" : `GGV_2`.`user_id`, "friend" : `GGV_5` } )
       INNER JOIN  `Yelp`.`Users` AS `GGV_6`
       ON          `GGV_4`.`friend` = `GGV_6`.`user_id`
+      WITH        `GGV_6` != `GGV_2`
       WITH        `GGV_7` = ( `GGV_6` )
       WITH        `u` = ( `GGV_6` )
       WITH        `GGV_1` = ( { "user_id" : `GGV_2`.`user_id`, "friend" : `GGV_5` } )
-      WHERE       `GGV_6` != `GGV_2`
 
       UNION ALL  
 
@@ -93,9 +93,9 @@ Example
       WITH        `GGV_10` = ( { "user_id" : `GGV_8`.`user_id`, "friend" : `GGV_11` } )
       INNER JOIN  `Yelp`.`Users` AS `GGV_12`
       ON          `GGV_10`.`friend` = `GGV_12`.`user_id`
+      WITH        `GGV_8` != `GGV_12`
       WITH        `GGV_13` = ( `GGV_12` )
       WITH        `v` = ( `GGV_12` )
-      WITH        `GGV_1` = ( { "user_id" : `GGV_8`.`user_id`, "friend" : `GGV_11` } )
-      WHERE       `GGV_8` != `GGV_12` ) ;
+      WITH        `GGV_1` = ( { "user_id" : `GGV_8`.`user_id`, "friend" : `GGV_11` } ) ) ;
     ```
 
