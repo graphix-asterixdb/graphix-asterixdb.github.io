@@ -18,22 +18,25 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
 ## Starting a Sample Cluster
 
 1. Head on over to the [Installation](../docs/installation.html) section and install AsterixDB + Graphix.
-2. Navigate to the `asterix-server` folder in your AsterixDB installation directory, and locate the executables folder.
-    ```bash
-    cd "${ASTERIXDB_INSTALLATION_DIR}/asterixdb/asterix-server/target"
-    cd "asterix-server-*-binary-assembly/apache-asterixdb-*-SNAPSHOT/bin"
-    ```
-3. We are going to start a 1-node cluster using the Graphix extension. Start the NC service.
+2. Locate the binaries folder. We are going to start a 1-node cluster using the Graphix extension. Start the NC service.
     ```bash
     ./bin/asterixncservice -logdir - &
     ```
-4. Start our cluster controller, and use the sample Graphix `cc.conf`.
+3. Create a configuration file that will signal to AsterixDB that you want to use Graphix.
     ```bash
-    GRAPHIX_CC_CONF="${ASTERIXDB_INSTALLATION_DIR}/asterix-graphix/src/main/resources/cc.conf"
-    ./bin/asterixcc -config-file ${GRAPHIX_CC_CONF} &
-    ```
-    The Graphix extension is enabled through the last lines of the `cc.conf`:
-    ```properties
+    echo -e "
+    [nc/asterix_nc]
+    txn.log.dir=target/tmp/asterix_nc/txnlog
+    core.dump.dir=target/tmp/asterix_nc/coredump
+    iodevices=target/tmp/asterix_nc/iodevice
+    
+    [nc]
+    address=127.0.0.1
+    command=asterixnc
+    
+    [cc]
+    address=127.0.0.1
+    
     [extension/org.apache.asterix.graphix.extension.GraphixQueryTranslatorExtension]
     enabled=true
 
@@ -41,7 +44,12 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     enabled=true
 
     [extension/org.apache.asterix.graphix.extension.GraphixMetadataExtension]
-    enabled=true
+    enabled=true 
+    " > cc.conf
+    ```
+4. Start our cluster controller, and use the config file (`cc.conf`) you just created.
+    ```bash
+    ./bin/asterixcc -config-file cc.conf &
     ```
 
 ## Building AsterixDB Datasets
