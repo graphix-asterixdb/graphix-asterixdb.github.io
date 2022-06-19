@@ -20,7 +20,7 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
 1. Head on over to the [Installation](../docs/installation.html) section and install AsterixDB + Graphix.
 2. Locate the binaries folder. We are going to start a 1-node cluster using the Graphix extension. Start the NC service.
     ```bash
-    ./bin/asterixncservice -logdir - &
+    ./asterixncservice -logdir - &
     ```
 3. Create a configuration file that will signal to AsterixDB that you want to use Graphix.
     ```bash
@@ -49,7 +49,7 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     ```
 4. Start our cluster controller, and use the config file (`cc.conf`) you just created.
     ```bash
-    ./bin/asterixcc -config-file cc.conf &
+    ./asterixcc -config-file cc.conf &
     ```
 
 ## Building AsterixDB Datasets
@@ -61,13 +61,13 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     USE               Gelp;
     
     CREATE TYPE       BusinessesType
-    AS                { business_id : bigint };
+    AS                { business_id : string };
     CREATE DATASET    Businesses (BusinessesType)
     PRIMARY KEY       business_id;
 
     CREATE TYPE       UsersType 
     AS                { user_id : bigint };
-    CREATE DATASET    Users (UserType)
+    CREATE DATASET    Users (UsersType)
     PRIMARY KEY       user_id;
        
     CREATE TYPE       ReviewsType
@@ -90,10 +90,11 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
 3. Having populated our `Businesses` dataset, let's now move onto our `Users`:
     ```
     INSERT INTO   Gelp.Users [
-        { "user_id": 1, "name": "Mary", "friends": [ 4, 5 ] },
-        { "user_id": 2, "name": "John", "friends": [ 5 ] },
-        { "user_id": 4, "name": "Susan", "friends": [ 1 ] },
-        { "user_id": 5, "name": "Larry", "friends": [ 1, 2 ] }
+        { "user_id": 1, "name": "Mary", "friends": [ 2 ] },
+        { "user_id": 2, "name": "John", "friends": [ 1, 3, 4 ] },
+        { "user_id": 3, "name": "Kevin", "friends": [ 2, 5 ] },
+        { "user_id": 4, "name": "Susan", "friends": [ 2, 5 ] },
+        { "user_id": 5, "name": "Larry", "friends": [ 3, 4 ] }
     ];
     ```
     Similar to our `Businesses` records, these `Users` records inserted include two fields that weren't defined in their dataset type: `name` and `friends`.
@@ -103,8 +104,8 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     ```
     INSERT INTO   Gelp.Reviews [
         { "review_id": "R1", "user_id": 1, "business_id": "B3", "review_time": date("2022-03-01") },
-        { "review_id": "R2", "user_id": 5, "business_id": "B3", "review_time": date("2022-03-01") },
-        { "review_id": "R3", "user_id": 2, "business_id": "B1", "review_time": date("2022-03-02") },
+        { "review_id": "R2", "user_id": 3, "business_id": "B3", "review_time": date("2022-03-01") },
+        { "review_id": "R3", "user_id": 2, "business_id": "B3", "review_time": date("2022-03-02") },
         { "review_id": "R4", "user_id": 5, "business_id": "B1", "review_time": date("2022-03-03") },
         { "review_id": "R5", "user_id": 5, "business_id": "B2" }
     ];
@@ -227,7 +228,7 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     ```
 4. When we put all these pieces together, we get the following:
     ```
-    CREATE  GRAPH GelpGraph
+    CREATE  GRAPH Gelp.GelpGraph
 
     AS      VERTEX           (:Business)
             PRIMARY KEY      (business_id)
@@ -264,7 +265,7 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
             DESTINATION KEY  (friend)
             AS ( FROM    Gelp.Users U
                  UNNEST  U.friends F
-                 SELECT  F AS friend
+                 SELECT  F AS friend,
                          U.user_id );
     ```
     Issuing the statement above will create a managed graph in Graphix.
@@ -275,11 +276,11 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     To start, let's see what our `Business` vertices look like.
     We build the following gSQL++ query:
     ```
-    FROM    GRAPH GelpGraph
+    FROM    GRAPH Gelp.GelpGraph
     MATCH   (b:Business)
     SELECT  b;
     ```
-    The query above starts by specifying the graph we are querying (the `FROM GRAPH GelpGraph` line), followed by a graph pattern consisting of a single vertex whose label is to `Business`, concluding with a `SELECT` clause containing the variable of our vertex.
+    The query above starts by specifying the graph we are querying (the `FROM GRAPH Gelp.GelpGraph` line), followed by a graph pattern consisting of a single vertex whose label is to `Business`, concluding with a `SELECT` clause containing the variable of our vertex.
     For a more in-depth explanation on what a graph pattern is, see the [Graphix Query Model](../docs/query-model.html) page.
     If we issue our query, we get the following results:
     ```json
@@ -293,22 +294,22 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     In particular, let's see what all `ABOUT` edges return.
     We build the following gSQL++ query:
     ```
-    FROM    GRAPH GelpGraph
+    FROM    GRAPH Gelp.GelpGraph
     MATCH   (:Review)-[a:ABOUT]->(:Business)
     SELECT  a;
     ```
     Issuing the query above yields the following results:
     ```json
-    { "review_id": "R1", "business_id": "B3" }
-    { "review_id": "R2", "business_id": "B3" }
-    { "review_id": "R3", "business_id": "B1" }
-    { "review_id": "R4", "business_id": "B1" }
+    { "a": { "review_id": "R1", "business_id": "B3" } }
+    { "a": { "review_id": "R2", "business_id": "B3" } }
+    { "a": { "review_id": "R3", "business_id": "B3" } }
+    { "a": { "review_id": "R4", "business_id": "B1" } }
     ```
     In contrast to our `Business` vertices, our `Review` vertices and all connecting edges filter out records from the `Reviews` dataset if their `review_time` field is `NULL` or `MISSING`.
     The query being executed by AsterixDB is analogous to the following SQL++ query:
     ```
-    FROM    Yelp.Reviews R,
-            Yelp.Businesses B
+    FROM    Gelp.Reviews R,
+            Gelp.Businesses B
     WHERE   R.business_id = B.business_id
     SELECT  { "review_id": R.review_id, "business_id": R.business_id } AS a;
     ```
@@ -317,38 +318,87 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     In this scenario, we need to describe a _path_ between two vertices instead of an edge.
     We build the following gSQL++ query:
     ```
-    FROM    GRAPH GelpGraph
-    MATCH   (u1:User)-[f:FRIENDS_WITH{1,4}]-(u2:User)
-    LET     vertices = PATH_VERTICES(f),
-            edges = PATH_EDGES(f)
-    SELECT  u1, u2, vertices, edges;
+    FROM      GRAPH Gelp.GelpGraph
+    MATCH     (u1:User)-[f:FRIENDS_WITH{1,4}]->(u2:User)
+    LET       pathIDs = ( FROM   VERTICES(f) fv
+                          SELECT VALUE fv.user_id )
+    SELECT    u1.user_id AS u1_user_id,
+              u2.user_id AS u2_user_id,
+              pathIDs
+    ORDER BY  u1_user_id, u2_user_id;
     ```
     Issuing the query above yields the following results:
     ```json
-    TODO
+    { "u1_user_id": 1, "u2_user_id": 2, "pathIDs": [ 1, 2 ] }
+    { "u1_user_id": 1, "u2_user_id": 3, "pathIDs": [ 1, 2, 3 ] }
+    { "u1_user_id": 1, "u2_user_id": 3, "pathIDs": [ 1, 2, 4, 5, 3 ] }
+    { "u1_user_id": 1, "u2_user_id": 4, "pathIDs": [ 1, 2, 4 ] }
+    { "u1_user_id": 1, "u2_user_id": 4, "pathIDs": [ 1, 2, 3, 5, 4 ] }
+    { "u1_user_id": 1, "u2_user_id": 5, "pathIDs": [ 1, 2, 3, 5 ] }
+    { "u1_user_id": 1, "u2_user_id": 5, "pathIDs": [ 1, 2, 4, 5 ] }
+    { "u1_user_id": 2, "u2_user_id": 1, "pathIDs": [ 2, 1 ] }
+    { "u1_user_id": 2, "u2_user_id": 3, "pathIDs": [ 2, 3 ] }
+    { "u1_user_id": 2, "u2_user_id": 3, "pathIDs": [ 2, 4, 5, 3 ] }
+    { "u1_user_id": 2, "u2_user_id": 4, "pathIDs": [ 2, 4 ] }
+    { "u1_user_id": 2, "u2_user_id": 4, "pathIDs": [ 2, 3, 5, 4 ] }
+    { "u1_user_id": 2, "u2_user_id": 5, "pathIDs": [ 2, 3, 5 ] }
+    { "u1_user_id": 2, "u2_user_id": 5, "pathIDs": [ 2, 4, 5 ] }
+    { "u1_user_id": 3, "u2_user_id": 1, "pathIDs": [ 3, 2, 1 ] }
+    { "u1_user_id": 3, "u2_user_id": 1, "pathIDs": [ 3, 5, 4, 2, 1 ] }
+    { "u1_user_id": 3, "u2_user_id": 2, "pathIDs": [ 3, 2 ] }
+    { "u1_user_id": 3, "u2_user_id": 2, "pathIDs": [ 3, 5, 4, 2 ] }
+    { "u1_user_id": 3, "u2_user_id": 4, "pathIDs": [ 3, 2, 4 ] }
+    { "u1_user_id": 3, "u2_user_id": 4, "pathIDs": [ 3, 5, 4 ] }
+    { "u1_user_id": 3, "u2_user_id": 5, "pathIDs": [ 3, 5 ] }
+    ... 
     ```
     The query above illustrates a _navigational graph pattern_, where `f` corresponds to a path instead of an edge.
     Vertices of path are accessed using the `PATH_VERTICES` function, and edges of a path are accessed using the `PATH_EDGES` function.
     Graphix currently requires a limit on the number of hops in the path, but we are working on an unbounded navigational query pattern solution.
    
-4. Let's expand on the previous scenario: suppose we are not interested in multiple paths between the same two users, but instead we are interested in the _shortest_ path.
+4. Note the large amount of results in the previous result set (emphasized with the `...`).
+    Let's expand on the previous scenario: suppose we are not interested in multiple paths between the same two users, but instead we are interested in the _shortest_ path.
     We build the following gSQL++ query, taking advantage of how SQL++ treats grouping:
     ```
-    FROM      GRAPH GelpGraph
-    MATCH     (u1:User)-[f:FRIENDS_WITH{1,4}]-(u2:User)
+    FROM      GRAPH Gelp.GelpGraph
+    MATCH     (u1:User)-[f:FRIENDS_WITH{1,4}]->(u2:User)
     GROUP BY  u1, u2
     GROUP AS  g
     LET       shortestPath = (
-        FROM     g
-        SELECT   g.p
-        ORDER BY PATH_HOP_COUNT(p) ASC
+        FROM     g gi
+        LET      pathIDs = ( FROM    VERTICES(gi.f) fv
+                             SELECT  VALUE fv.user_id )
+        SELECT   VALUE pathIDs 
+        ORDER BY PATH_HOP_COUNT(gi.f) ASC
         LIMIT    1
-    )
-    SELECT    u1, u2, shortestPath;
+    )[0]
+    SELECT    u1.user_id AS u1_user_id,
+              u2.user_id AS u2_user_id,
+              shortestPath,
+              COUNT(*) AS totalPaths;
     ```
     Issuing the query above yields the following results:
     ```json
-    TODO
+    { "u1_user_id": 2, "u2_user_id": 1, "shortestPath": [ 2, 1 ], "totalPaths": 1 }
+    { "u1_user_id": 2, "u2_user_id": 3, "shortestPath": [ 2, 3 ], "totalPaths": 2 }
+    { "u1_user_id": 2, "u2_user_id": 4, "shortestPath": [ 2, 4 ], "totalPaths": 2 }
+    { "u1_user_id": 2, "u2_user_id": 5, "shortestPath": [ 2, 3, 5 ], "totalPaths": 2 }
+    { "u1_user_id": 1, "u2_user_id": 2, "shortestPath": [ 1, 2 ], "totalPaths": 1 }
+    { "u1_user_id": 1, "u2_user_id": 3, "shortestPath": [ 1, 2, 3 ], "totalPaths": 2 }
+    { "u1_user_id": 1, "u2_user_id": 4, "shortestPath": [ 1, 2, 4 ], "totalPaths": 2 }
+    { "u1_user_id": 1, "u2_user_id": 5, "shortestPath": [ 1, 2, 3, 5 ], "totalPaths": 2 }
+    { "u1_user_id": 3, "u2_user_id": 2, "shortestPath": [ 3, 2 ], "totalPaths": 2 }
+    { "u1_user_id": 3, "u2_user_id": 1, "shortestPath": [ 3, 2, 1 ], "totalPaths": 2 }
+    { "u1_user_id": 3, "u2_user_id": 4, "shortestPath": [ 3, 2, 4 ], "totalPaths": 2 }
+    { "u1_user_id": 3, "u2_user_id": 5, "shortestPath": [ 3, 5 ], "totalPaths": 2 }
+    { "u1_user_id": 4, "u2_user_id": 2, "shortestPath": [ 4, 2 ], "totalPaths": 2 }
+    { "u1_user_id": 4, "u2_user_id": 1, "shortestPath": [ 4, 2, 1 ], "totalPaths": 2 }
+    { "u1_user_id": 4, "u2_user_id": 3, "shortestPath": [ 4, 2, 3 ], "totalPaths": 2 }
+    { "u1_user_id": 4, "u2_user_id": 5, "shortestPath": [ 4, 5 ], "totalPaths": 2 }
+    { "u1_user_id": 5, "u2_user_id": 2, "shortestPath": [ 5, 3, 2 ], "totalPaths": 2 }
+    { "u1_user_id": 5, "u2_user_id": 1, "shortestPath": [ 5, 3, 2, 1 ], "totalPaths": 2 }
+    { "u1_user_id": 5, "u2_user_id": 3, "shortestPath": [ 5, 3 ], "totalPaths": 2 }
+    { "u1_user_id": 5, "u2_user_id": 4, "shortestPath": [ 5, 4 ], "totalPaths": 2 }
     ```
     The query above can be thought of as grouping all distinct pairs of users `u1` and `u2`, then fetching the path out of all paths between `u1` and `u2` that has the shortest length.
     The ability to operate on groups using subqueries in SQL++ allows gSQL++ to be express a numerous amount of typical path finding problems (e.g. weighted shortest paths).
