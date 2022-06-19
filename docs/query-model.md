@@ -59,7 +59,7 @@ Let us now take a look at an instance of Gelp.
 </p>
 {: .code-example }
 
-In the figure above, there are seven vertices, six of which are connected.
+In the figure above, there are eight vertices.
 The properties of each vertex are given in the ADM instance immediately below the vertex itself.
 
 ## Property Graph Query Model
@@ -75,12 +75,17 @@ Let us first describe the problem of _pattern matching_ in graphs.
 A _graph pattern_ can be thought of as another graph, framing the problem of _pattern matching_ as finding all valid mappings of our graph pattern to the graph we are querying.
 To give an example, let us define a graph pattern composed of a _User_, a _Review_, and a _MADE_BY_ edge.
 
-TODO 
+<p align="center">
+    <img src="../images/GelpBGPQuery.svg" />
+</p>
+{: .code-example }
 
 To match the pattern above to the instance of the Gelp graph above yields the following mappings:
-```json
-TODO
-```
+
+<p align="center">
+    <img src="../images/GelpBGPResult.svg" />
+</p>
+{: .code-example }
 
 {::comment}
 A natural question that arises when talking about pattern matching is "how do we determine these mappings?".
@@ -108,13 +113,23 @@ In contrast to pattern matching, in path finding we _do not_ know the exact patt
 Instead of describing a pattern, we describe a _path_ to find all valid mappings of our path description to edge instances in our graph.
 When we use regular expressions to describe our paths, we classify our path finding problem as answering _regular path queries_ (RPQs).
 To give an example, let us define a graphical path description of a path between 1 and 5 hops, composed only of _FRIENDS_WITH_ edge instances.
-The vertices we are interested in finding a path between are the user "Susan" and the user "Larry".
+The vertices we are interested in finding a path between are the user "Mary" and the user "Kevin" (directed from "Mary" to "Kevin").
 
-TODO
+<p align="center">
+    <img src="../images/GelpNavigationQuery.svg" />
+</p>
+{: .code-example }
 
-To match the path description above between the "Susan" and the "Larry" vertices yields the following path:
+To match the path description above between the "Mary" and the "Kevin" vertices yields the following paths:
 
-TODO
+<p align="center">
+    <img src="../images/GelpNavigationResult.svg" />
+</p>
+{: .code-example }
+
+In our result set, we only consider paths that _do not_ repeat edges or vertices.
+Different systems have different semantics with respect to what paths they consider.
+In Graphix, cycles are never considered unless explicitly specified.
 
 {::comment}
 Similar to pattern matching, there are a variety of different semantics when asking "what is a valid path"?
@@ -144,11 +159,17 @@ The superclass of queries described here are known formally as _conjunctive regu
 To extend the _FRIENDS_WITH_ example from the previous section, suppose we are now interested in finding such a path between _any_ pair of users that have made a review.
 Graphically, we describe our query as such:
 
-TODO
+<p align="center">
+    <img src="../images/GelpNGPQuery.svg" />
+</p>
+{: .code-example }
 
 To evaluate the navigational pattern matching query above yields the following results:
 
-TODO
+<p align="center">
+    <img src="../images/GelpNGPResult.svg" />
+</p>
+{: .code-example }
 
 Navigational pattern matching provides the foundation of most graph query languages (e.g. SPARQL, Cypher, Gremlin).
 
