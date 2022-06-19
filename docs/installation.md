@@ -20,7 +20,8 @@ If you have a previous AsterixDB instance and want to execute Graphix queries on
 ## Using a Pre-Built Package
 
 1. Ensure that you have Java 11 installed in your environment.
-2. Download the pre-built Graphix package [here](https://drive.google.com/file/d/1yQUvaesLo5YwvlsqseA5iMHxiLM1CEZo/view?usp=sharing).
+2. Download the pre-built Graphix package [here](https://drive.google.com/file/d/1xosJRxzyr4sfHpR-aEiiHnryMSPWQlqS/view?usp=sharing).
+    Unzip this file and open a terminal at the unzipped folder.
 3. Create a configuration file that will signal to AsterixDB that you want to use Graphix.
     ```bash
     cd apache-asterixdb-*-SNAPSHOT/bin
