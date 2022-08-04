@@ -20,7 +20,7 @@ nav_order: 3
 
 ## Vertex Functions
 
-### LABEL (v)
+### `LABEL (v)`
 Retrieves the label associated with the vertex.
 The range of this function is the set of vertex labels of the graph that `v` belongs to.
 
@@ -43,7 +43,7 @@ Example
     { "nLabel": "Business" }
     ```
 
-### VERTEX_DETAIL (v)
+### `VERTEX_DETAIL (v)`
 Retrieves the Graphix-internal information associated with the vertex.
 This does not include the properties of the vertex.
 
@@ -72,7 +72,7 @@ Example
 
 ## Edge Functions
 
-### LABEL (e)
+### `LABEL (e)`
 Retrieves the label associated with the edge.
 The range of this function is the set of edge labels of the graph that `e` belongs to.
 
@@ -95,7 +95,7 @@ Example
     { "eLabel": "ABOUT" }
     ```
 
-### EDGE_DETAIL (e)
+### `EDGE_DETAIL (e)`
 Retrieves the Graphix-internal information associated with the edge.
 This does not include the properties of the edge.
 
@@ -122,7 +122,7 @@ Example
     }
     ```
 
-### EDGE_DIRECTION (e)
+### `EDGE_DIRECTION (e)`
 Retrieves the direction associated with the edge.
 The range of this function is the following collection: `["LEFT_TO_RIGHT", "RIGHT_TO_LEFT"]`.
 
@@ -150,7 +150,7 @@ Example
     { "v1Label": "Review", "v2Label": "Business", "eDirection": "LEFT_TO_RIGHT" }
     ```
 
-### EDGE_SOURCE_VERTEX (e)
+### `EDGE_SOURCE_VERTEX (e)`
 Retrieve the source vertex associated with the edge.
 This function does **not** work on path variables.
 
@@ -175,7 +175,7 @@ Example
     { "sourceVertexLabel": "User" }
     ```
 
-### EDGE_DEST_VERTEX (e)
+### `EDGE_DEST_VERTEX (e)`
 Retrieve the destination vertex associated with the edge.
 This function does **not** work on path variables.
 
@@ -206,7 +206,7 @@ Example
 
 _Every function described in this section also applies to sub-paths, or paths that are defined using only the EdgePattern production._
 
-### PATH_HOP_COUNT (p)
+### `PATH_HOP_COUNT (p)`
 Retrieves the number of edges in a given path.
 
 Aliases
@@ -224,7 +224,7 @@ Example
                        MATCH   ( ) AS p
                        SELECT  DISTINCT VALUE PATH_HOP_COUNT (p) ),
             count2 = ( FROM    GRAPH GelpGraph
-                       MATCH   ( )-[:{1,2}]-( ) AS p
+                       MATCH   ( )-[{1,2}]-( ) AS p
                        SELECT  DISTINCT VALUE PATH_HOP_COUNT (p) )
     SELECT  count1, count2;
     ```
@@ -233,7 +233,7 @@ Example
     { "count1": [ 0 ], "count2": [ 1, 2 ] }
     ```
 
-### PATH_VERTICES (p)
+### `PATH_VERTICES (p)`
 Retrieves the vertices found in a given path.
 
 Aliases
@@ -258,7 +258,7 @@ Example
     { "vertexLabel": "User" }
     ```
 
-### PATH_EDGES (p)
+### `PATH_EDGES (p)`
 Retrieves the edges found in a given path.
 
 Aliases

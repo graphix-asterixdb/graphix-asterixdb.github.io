@@ -61,7 +61,7 @@ Similar to SQL++ (but unlike SQL), gSQL++ allows the `SELECT` clause to appear e
 For some queries, placing the `SELECT` clause at the end may make a query block easier to understand because the `SELECT` clause refers to variables defined in the _stream generator_ production.
 
 
-## FROM Clause
+## `FROM` Clause
 
 The purpose of a `FROM` clause is to iterate over a collection.
 An additional function of the `FROM` clause in gSQL++ is to introduce an iteration over collections of graph elements (vertices, edges, and paths) involved in mapping a navigational graph query pattern (i.e. introduced via the `MATCH` clause) to a graph schema (an unmanaged `GraphConstructor` or a managed graph identified by its `QualifiedName`).
@@ -148,7 +148,7 @@ Putting aside the good practice of specifying explicit iteration variables in SQ
 Consequently, gSQL++ does **not** support implicit iteration variables when the source `FromClause` is iterating over a collection of `MATCH` to graph schema mappings.
 This lack of support contrasts SQL++, where one-dataset queries are (arguably) more common.
 
-## MATCH Clause
+## `MATCH` Clause
 
 The purpose of a `MATCH` clause is to specify a (potentially navigational) graph pattern and introduce all mapping _permutations_ of the graph pattern to the underlying data.
 
@@ -206,6 +206,22 @@ Edge Detail
 {: .text-gamma .fw-500 .lh-0 }
 <p align="center">
     <img src="../../images/EdgeDetail.svg" />
+</p>
+{: .code-example }
+<br>
+
+Label Set Detail
+{: .text-gamma .fw-500 .lh-0 }
+<p align="center">
+    <img src="../../images/LabelSetDetail.svg" />
+</p>
+{: .code-example }
+<br>
+
+Parenthesized Label Set
+{: .text-gamma .fw-500 .lh-0 }
+<p align="center">
+    <img src="../../images/ParenthesizedLabelSet.svg" />
 </p>
 {: .code-example }
 <br>
@@ -272,6 +288,15 @@ MATCH   (u1:User)-[:(FRIENDS_WITH|MADE_BY){1,5}]-(u2:User)
 SELECT  u1, u2;
 ```
 
+Sometimes it may be helpful to specify which labels _should not_ appear in a pattern.
+The `^` operator allows a user to negate one or more labels.
+The query below is a modification of the previous query to only allow edges that are not labeled `MADE_BY`.
+```
+FROM    GRAPH GelpGraph
+MATCH   (u1:User)-[:^MADE_BY{1,5}]-(u2:User)
+SELECT  u1, u2;
+```
+
 Similar to SQL, gSQL++ offers optional binding to patterns with the `LEFT MATCH` clause.
 The following example asks for users and their friends, as well as reviews if they have any.
 ```
@@ -285,7 +310,7 @@ In the example above, if there was a `mb` edge record that was connected to `u1`
 The flexibility of AsterixDB's data model means that edges in Graphix may not be "consistent".
 gSQL++ will always work in units of patterns, not individual collections.
 
-## LET Clause
+## `LET` Clause
 
 `LET` clauses serve the same purpose in gSQL++ as they do in SQL++: for specifying an expression once, but referring to the expression elsewhere one or more times elsewhere in your query.
 Refer to the AsterixDB documention on `LET` clauses [here](https://asterixdb.apache.org/docs/0.9.8/sqlpp/manual.html#Let_clauses) for more details.
@@ -302,7 +327,7 @@ LET Clause
 
 * * * 
 
-## WHERE Clause
+## `WHERE` Clause
 
 `WHERE` clauses serve the same purpose in gSQL++ as they do in SQL++: to filter out records that do not satisfy a certain condition, specified using variables from the `FROM` clause.
 Refer to the AsterixDB documention on `WHERE` clauses [here](https://asterixdb.apache.org/docs/0.9.8/sqlpp/manual.html#WHERE_Clause) for more details.
@@ -318,7 +343,7 @@ WHERE Clause
 
 * * * 
 
-## GROUP BY Clause
+## `GROUP BY` Clause
 
 `GROUP BY` clauses serve the same purpose in gSQL++ as they do in SQL++: to organize records into groupings defined by a grouping element.
 gSQL++ also inherits the same grouping semantics from SQL: after a `GROUP BY`, the only fields that can referred to are fields from the grouping fields, or aggregate functions on the group itself (`GROUP AS` offers more flexibility here, as we'll see later).
@@ -355,14 +380,14 @@ Ordinary Grouping Set
 The following query retrieves how many 1 to 5 hop paths there are for every pair of users.
 ```
 FROM      GRAPH GelpGraph
-MATCH     (u1:User)-[:{1,5}]-(u2:User)
+MATCH     (u1:User)-[{1,5}]-(u2:User)
 GROUP BY  u1, u2
 SELECT    u1, u2, COUNT(*) AS cnt;
 ```
 In the example above, the `FROM` clause produces records for all paths (of 1 to 5 hops) between `u1` and `u2`.
 The `GROUP BY` clause will then generate groups for all unique pairs of `u1` and `u2`, and then count all records in each group, for each group.
 
-## HAVING Clause
+## `HAVING` Clause
 
 `HAVING` clauses serve the same purpose in gSQL++ as they do in SQL++: to filter out _groups_ that do not satisfy a certain condition, specified using aggregates on the group itself.
 Refer to the AsterixDB documention on `HAVING` clauses [here](https://asterixdb.apache.org/docs/0.9.8/sqlpp/manual.html#HAVING_Clause) for more details.
@@ -378,7 +403,7 @@ HAVING Clause
 
 * * * 
 
-## GROUP AS Clause
+## `GROUP AS` Clause
 
 `GROUP AS` clauses serve the same purpose in gSQL++ as they do in SQL++: to preserve all records in a group, as they were before the `GROUP BY` clause.
 Refer to the AsterixDB documention on `GROUP AS` clauses [here](https://asterixdb.apache.org/docs/0.9.8/sqlpp/manual.html#GROUP_AS_Clause) for more details.

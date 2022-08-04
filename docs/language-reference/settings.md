@@ -1,15 +1,14 @@
 ---
 layout: default
-title: Settings
+title: Query Tuning 
 parent: Language Reference
 nav_order: 4
 ---
 
-# Settings
+# Query Tuning
 {: .no_toc }
 
-This page details Graphix-specific compiler settings that can be set on a per-request basis with the `SET` statement.
-All settings described in this page are preceeded by `graphix.`.
+This page details Graphix-specific compiler settings and hints that can be set on a per-request basis.
 
 ## Table of Contents
 {: .no_toc .text-delta }
@@ -19,9 +18,11 @@ All settings described in this page are preceeded by `graphix.`.
 
 * * *
 
-## MATCH-EVALUATION
+## Compiler Settings
 
-Modifies what graph elements can be set equal to one another during pattern matching.
+### `GRAPHIX.SEMANTICS.PATTERN`
+
+Modifies what graph elements are allowed to be equal to one another during _pattern matching_.
 By default, pattern matching is evaluated with the `"isomorphism"` setting, which does not allow duplicate vertices OR edges.
 In contrast to languages like Cypher which enforce pattern matching semantics locally within a `MATCH` clause, in gSQL++ such semantics are enforced across _all_ `MATCH` clauses.
 
@@ -39,7 +40,7 @@ Isomorphism
 
 Example
 :   ```
-    SET       `graphix.match-evaluation` "homomorphism";
+    SET       `graphix.semantics.pattern` "homomorphism";
     
     FROM      GRAPH GelpGraph
     MATCH     (m:User)-(:Review)-(n:User)
@@ -55,15 +56,68 @@ Example
     The result above would not have shown up without our `SET` statement.
 
 
-## PRINT-REWRITE
+### `GRAPHIX.SEMANTICS.NAVIGATION`
+
+Modifies what graph elements can be equal to one another during _navigation_.
+We distinguish between the semantics of pattern matching, which applies to all explicitly specified vertices and edges, and the semantics of navigation, which only applies to vertices and edges traversed through a sub-path.
+By default, navigation is evaluted with the `no-repeated-anything` setting, which does not allow duplicate vertices OR edges to be traversed.
+Some form of uniqueness must be specified for navigation to guarantee that cycles are not processed.
+
+No-Repeated-Vertices
+: Under no-repeated-vertices navigation semantics, vertices cannot be traversed more than once, but edges can be traversed multiple times (such a situation may occur if the vertex key is not the primary key of the underlying data).
+
+No-Repeated-Edges
+: Under no-repeated-edges navigation semantics, edges cannot be traversed more than once, but vertices can be traversed multiple times.
+
+No-Repeated-Anything
+: Under no-repeated-anything navigation semantics, neither vertices nor edges can be traversed more than once.
+
+Example
+:   ```
+    SET       `graphix.semantics.navigation` "no-repeated-edges";
+    
+    FROM      GRAPH GelpGraph
+    MATCH     (:User)-[p+]-(:User)
+    LET       vertexIDs = (
+        FROM   PATH_VERTICES(p) pv
+        LET    vertexLabel = LABEL(pv)
+        SELECT CASE WHEN vertexLabel = "User"
+                    THEN pv.user_id
+                    WHEN vertexLabel = "Review"
+                    THEN pv.review_id
+                    WHEN vertexLabel = "Business"
+                    THEN pv.business_id
+               END AS vertexKey, vertexLabel
+              )
+    SELECT    VALUE vertexIDs 
+    LIMIT     1;
+    ```
+    Returns the following:
+    ```json
+    [ { "vertexKey": 1,    "vertexLabel": "User" },
+      { "vertexKey": "R1", "vertexLabel": "Review" },
+      { "vertexKey": "B3", "vertexLabel": "Business" },
+      { "vertexKey": "R4", "vertexLabel": "Review" },
+      { "vertexKey": 6,    "vertexLabel": "User" },
+      { "vertexKey": "R2", "vertexLabel": "Review" },
+      { "vertexKey": "B3", "vertexLabel": "Business" },
+      { "vertexKey": "R7", "vertexLabel": "Review" },
+      { "vertexKey": 2,    "vertexLabel": "User" } ]
+    ```
+    Notice how the business `"B3"` appears twice in our list of traversed vertices.
+    Such a path would not be returned without our `SET` statement.
+
+
+
+### `GRAPHIX.LOG-REWRITE`
 
 Prints and logs the normalized gSQL++ (an _almost_ valid SQL++ query) to the log file right before the query is transformed into a logical plan.
-This setting is particularly useful when debugging gSQL++ queries, although future work entails adding this field in the response JSON of an HTTP request and adding proper language support (e.g. `EXPLAIN REWRITE ...`).
+This setting is particularly useful when debugging gSQL++ queries.
 By default, this setting is turned off (i.e. set to `"false"`).
 
 Example
 :   ```
-    SET     `graphix.print-rewrite` "true";
+    SET     `graphix.log-rewrite` "true";
     FROM    GRAPH GelpGraph
     MATCH   (u:User)-(v:User)
     SELECT  u, v;
@@ -99,3 +153,28 @@ Example
       WITH        `GGV_1` = ( { "user_id" : `GGV_8`.`user_id`, "friend" : `GGV_11` } ) ) ;
     ```
 
+## Query Hints
+
+### `PATH-EXPAND`
+
+If an edge pattern contains a sub-path whose number of hops is _bounded_, then we have two ways we can evaluate our pattern: 
+1. Rewrite our sub-path into a `UNION-ALL` of all possible ways our sub-path could be evaluated. 
+2. Evaluate our sub-path using a dedicated fixed-point operator.
+
+By default, sub-paths are evaluated using the latter.
+To evaluate an edge pattern using the former, add the query hint after all detail in the pattern itself:
+```
+FROM    GRAPH GelpGraph
+MATCH   (u)-[{1,4} /* +path-expand */]-(v)
+SELECT  u, v;
+```
+
+### `PATH-FIXED-POINT`
+
+By default, sub-paths are evaluated using a dedicated fixed-point operator.
+To be explicit in the way your sub-paths are evaluated, you can annotate your sub-path with this hint:
+```
+FROM    GRAPH GelpGraph
+MATCH   (u)-[{1,4} /* +path-fixed-point */]-(v)
+SELECT  u, v;
+```

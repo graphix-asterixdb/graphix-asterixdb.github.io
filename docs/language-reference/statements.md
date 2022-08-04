@@ -18,7 +18,7 @@ nav_order: 2
 
 In addition to queries, gSQL++ needs to support statements for a) managing the definition of graphs, and b) for controlling the context used in query compilation & evaluation.
 
-## CREATE Statement
+## `CREATE` Statement
 
 The `CREATE` statement is used for creating dataverses and other persistent artifacts within a dataset.
 In Graphix, if users want to create a AsterixDB managed graph whose metadata / name is persisted across requests, they would use the `CREATE GRAPH` statement as opposed to the `DECLARE GRAPH` statement (see below) or an anonymous graph in a `FROM` clause. 
@@ -136,7 +136,7 @@ Although vertex and edge patterns are used to specify our graph schema, the foll
 5. An edge must be directed.
 6. An edge must reference a vertex that is defined within that schema.
 
-## DECLARE Statement
+## `DECLARE` Statement
 
 In gSQL++, users can `DECLARE` functions _and_ graphs (as opposed to SQL++, where users can only declare functions).
 Declared graphs will only exist within the scope of the current query, and are useful for querying a graph that is specific to one request.
@@ -161,7 +161,7 @@ DECLARE GRAPH Statement
 
 * * *
 
-## DROP Statement
+## `DROP` Statement
 
 The `DROP` statement is the inverse of the `CREATE` statement, and is used to drop dataverses, datatypes, indexes, functions, synonyms, and graphs.
 
@@ -176,7 +176,7 @@ DROP GRAPH Statement
 
 * * *
 
-## SET Statement
+## `SET` Statement
 
 The `SET` statement allows users to give additional context to both Graphix and the AsterixDB optimizer.
 For AsterixDB specific parameters, see [here](https://asterixdb.apache.org/docs/0.9.8/sqlpp/manual.html#Performance_tuning).
@@ -194,7 +194,7 @@ SET Statement
 * * *
 
 
-## (IN|UP)SERT Statement
+## `(IN|UP)SERT` Statement
 
 The `INSERT` statement is used to insert new data into a dataset.
 The `UPSERT` statement is "add or replace" data into / from a dataset.
@@ -232,7 +232,7 @@ SELECT  u1.user_id AS user_id,
         targetFriendID AS friend;
 ```
 
-## DELETE Statement
+## `DELETE` Statement
 
 The `DELETE` statement is used to delete data from a target dataset.
 This statement remains unchanged from SQL++.
