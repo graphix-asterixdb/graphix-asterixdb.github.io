@@ -1,5 +1,5 @@
 # Graphix AsterixDB
-A little website for the Graphix project. Check it out [here](https://graphix-asterixdb.github.io)!
+A little website for the Graphix project. Check it out [here](https://graphix.ics.uci.edu)!
 
 ## Contributing to Docs
 This website uses the [Just the Docs](https://just-the-docs.github.io/just-the-docs/) theme for Jekyll, a static site generator.
