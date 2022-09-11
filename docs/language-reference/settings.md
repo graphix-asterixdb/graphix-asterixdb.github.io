@@ -16,8 +16,6 @@ This page details Graphix-specific compiler settings and hints that can be set o
 1. TOC
 {: toc }
 
-* * *
-
 ## Compiler Settings
 
 ### `GRAPHIX.SEMANTICS.PATTERN`

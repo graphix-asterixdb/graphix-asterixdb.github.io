@@ -15,7 +15,6 @@ nav_order: 1
 1. TOC
 {: toc }
 
-
 ## Queries (Overview)
 
 A _query_ can either be an expression (whose composition remains unchanged from SQL++), or a construction of _query blocks_.
