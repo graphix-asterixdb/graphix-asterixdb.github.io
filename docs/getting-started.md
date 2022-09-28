@@ -18,38 +18,9 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
 ## Starting a Sample Cluster
 
 1. Head on over to the [Installation](../docs/installation.html) section and install AsterixDB + Graphix.
-2. Locate the binaries folder. We are going to start a 1-node cluster using the Graphix extension. Start the NC service.
+2. We are going to the follow the instructions using a pre-built package. Execute the `quickstart.sh` script to start a 1-node cluster using the Graphix extension.
     ```bash
-    ./asterixncservice -logdir - &
-    ```
-3. Create a configuration file that will signal to AsterixDB that you want to use Graphix.
-    ```bash
-    echo -e "
-    [nc/asterix_nc]
-    txn.log.dir=target/tmp/asterix_nc/txnlog
-    core.dump.dir=target/tmp/asterix_nc/coredump
-    iodevices=target/tmp/asterix_nc/iodevice
-    
-    [nc]
-    address=127.0.0.1
-    command=asterixnc
-    
-    [cc]
-    address=127.0.0.1
-    
-    [extension/org.apache.asterix.graphix.extension.GraphixQueryTranslatorExtension]
-    enabled=true
-
-    [extension/org.apache.asterix.graphix.extension.GraphixLangExtension]
-    enabled=true
-
-    [extension/org.apache.asterix.graphix.extension.GraphixMetadataExtension]
-    enabled=true 
-    " > cc.conf
-    ```
-4. Start our cluster controller, and use the config file (`cc.conf`) you just created.
-    ```bash
-    ./asterixcc -config-file cc.conf &
+    ./quickstart.sh
     ```
 
 ## Building AsterixDB Datasets
@@ -405,13 +376,9 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
 
 ## Stopping our Sample Cluster
 
-1. Navigate to the `asterix-server` folder in your AsterixDB installation directory, and locate the executables folder.
-```bash
-cd "${ASTERIXDB_INSTALLATION_DIR}/asterixdb/asterix-server/target"
-cd "asterix-server-*-binary-assembly/apache-asterixdb-*-SNAPSHOT/bin"
-```
+1. Navigate to the pre-built package directory from before.
+2. Execute the `quickstop.sh` script.
 
-2. To stop the cluster started in [Starting a Sample Cluster](./getting-started.html#starting-a-sample-cluster), run the following command:
-```bash
-./bin/asterixhelper shutdown_cluster_all
-```
+    ```bash
+    ./quickstop.sh
+    ```
