@@ -123,7 +123,7 @@ MATCH   (u1:User)-[:FRIENDS_WITH]->(u2:User)
 SELECT  u1, u2;
 ```
 
-To query over an unmanged graph, users can specify a `GraphConstructor` expression in lieu of the named of a managed graph:
+To query over an unmanaged graph, users can specify a `GraphConstructor` expression in lieu of the named of a managed graph:
 ```
 FROM    GRAPH AS
 
@@ -193,6 +193,14 @@ Vertex Pattern
 {: .code-example }
 <br>
 
+Vertex Detail
+{: .text-gamma .fw-500 .lh-0 }
+<p align="center">
+    <img src="../../images/VertexDetail.svg" />
+</p>
+{: .code-example }
+<br>
+
 Edge Pattern
 {: .text-gamma .fw-500 .lh-0 }
 <p align="center">
@@ -209,18 +217,26 @@ Edge Detail
 {: .code-example }
 <br>
 
-Label Set Detail
+Path Pattern
 {: .text-gamma .fw-500 .lh-0 }
 <p align="center">
-    <img src="../../images/LabelSetDetail.svg" />
+    <img src="../../images/PathPattern.svg" />
 </p>
 {: .code-example }
 <br>
 
-Parenthesized Label Set
+Path Detail
 {: .text-gamma .fw-500 .lh-0 }
 <p align="center">
-    <img src="../../images/ParenthesizedLabelSet.svg" />
+    <img src="../../images/PathDetail.svg" />
+</p>
+{: .code-example }
+<br>
+
+Label Set
+{: .text-gamma .fw-500 .lh-0 }
+<p align="center">
+    <img src="../../images/LabelSet.svg" />
 </p>
 {: .code-example }
 <br>
@@ -257,7 +273,7 @@ If a pattern does not share any vertices with any other pattern in that specific
 Disjoint patterns are analogous to cartesian products in SQL: the binding tuple stream after the `MATCH` clause contains all possible pairs of the disjoint patterns.
 
 Vertices and edges are the core of all graph queries, but often we may want to reason about our graph at the level of _paths_.
-Paths are a collection of edges, and can be specified in gSQL++ using two constructs: inside of an edge pattern or outside of an edge pattern.
+Paths are a collection of edges, and can be specified in gSQL++ using two constructs: inside an edge pattern or outside an edge pattern.
 The following query demonstrates the former, where we assign a variable of `p` to our path within the edge pattern production.
 ```
 FROM    GRAPH GelpGraph
@@ -273,28 +289,28 @@ MATCH   (u1:User)<-[:FRIENDS_WITH{1,3}]-(u2:User) AS p
 SELECT  PATH_VERTICES(p);
 ```
 
-The example above also illustates a _navigational_ query pattern, where `p` logically represents a path between one `FRIENDS_WITH` edge and three `FRIENDS_WITH` edges.
+The example above also illustrates a _navigational_ query pattern, where `p` logically represents a path between one `FRIENDS_WITH` edge and three `FRIENDS_WITH` edges.
 The use of curly braces `{` `}` in an edge pattern changes how the variable bound to that specific edge pattern is processed.
 If there are no curly braces, then the edge pattern is processed as an edge (and consequently, all edge functions can be used with said variable).
 If curly braces are present, then the edge pattern is processed as a _path_.
 The variable bound to this edge pattern path is functionally a path variable, and thus only path functions can be used.
 
-Alternation of edge labels can also be specified, using the `|` operator.
-The query below asks for all users `u1` and `u2` that are connected to each other by one to five `FRIENDS_WITH` or `MADE_BY` edges.
-```
-FROM    GRAPH GelpGraph
-MATCH   (u1:User)-[:(FRIENDS_WITH|MADE_BY){1,5}]-(u2:User)
-SELECT  u1, u2;
-```
+[//]: # (Alternation of edge labels can also be specified, using the `|` operator.)
+[//]: # (The query below asks for all users `u1` and `u2` that are connected to each other by one to five `FRIENDS_WITH` or `MADE_BY` edges.)
+[//]: # (```)
+[//]: # (FROM    GRAPH GelpGraph)
+[//]: # (MATCH   &#40;u1:User&#41;-[:&#40;FRIENDS_WITH|MADE_BY&#41;{1,5}]-&#40;u2:User&#41;)
+[//]: # (SELECT  u1, u2;)
+[//]: # (```)
 
-Sometimes it may be helpful to specify which labels _should not_ appear in a pattern.
-The `^` operator allows a user to negate one or more labels.
-The query below is a modification of the previous query to only allow edges that are not labeled `MADE_BY`.
-```
-FROM    GRAPH GelpGraph
-MATCH   (u1:User)-[:^MADE_BY{1,5}]-(u2:User)
-SELECT  u1, u2;
-```
+[//]: # (Sometimes it may be helpful to specify which labels _should not_ appear in a pattern.)
+[//]: # (The `^` operator allows a user to negate one or more labels.)
+[//]: # (The query below is a modification of the previous query to only allow edges that are not labeled `MADE_BY`.)
+[//]: # (```)
+[//]: # (FROM    GRAPH GelpGraph)
+[//]: # (MATCH   &#40;u1:User&#41;-[:^MADE_BY{1,5}]-&#40;u2:User&#41;)
+[//]: # (SELECT  u1, u2;)
+[//]: # (```)
 
 Similar to SQL, gSQL++ offers optional binding to patterns with the `LEFT MATCH` clause.
 The following example asks for users and their friends, as well as reviews if they have any.
@@ -309,10 +325,12 @@ In the example above, if there was a `mb` edge record that was connected to `u1`
 The flexibility of AsterixDB's data model means that edges in Graphix may not be "consistent".
 gSQL++ will always work in units of patterns, not individual collections.
 
+_Features such as edge label alternation and negation are planned, but not implemented yet._
+
 ## `LET` Clause
 
 `LET` clauses serve the same purpose in gSQL++ as they do in SQL++: for specifying an expression once, but referring to the expression elsewhere one or more times elsewhere in your query.
-Refer to the AsterixDB documention on `LET` clauses [here](https://asterixdb.apache.org/docs/0.9.8/sqlpp/manual.html#Let_clauses) for more details.
+Refer to the AsterixDB documentation on `LET` clauses [here](https://asterixdb.apache.org/docs/0.9.8/sqlpp/manual.html#Let_clauses) for more details.
 
 * * *
 
@@ -329,7 +347,7 @@ LET Clause
 ## `WHERE` Clause
 
 `WHERE` clauses serve the same purpose in gSQL++ as they do in SQL++: to filter out records that do not satisfy a certain condition, specified using variables from the `FROM` clause.
-Refer to the AsterixDB documention on `WHERE` clauses [here](https://asterixdb.apache.org/docs/0.9.8/sqlpp/manual.html#WHERE_Clause) for more details.
+Refer to the AsterixDB documentation on `WHERE` clauses [here](https://asterixdb.apache.org/docs/0.9.8/sqlpp/manual.html#WHERE_Clause) for more details.
 
 * * *
 
@@ -346,7 +364,7 @@ WHERE Clause
 
 `GROUP BY` clauses serve the same purpose in gSQL++ as they do in SQL++: to organize records into groupings defined by a grouping element.
 gSQL++ also inherits the same grouping semantics from SQL: after a `GROUP BY`, the only fields that can referred to are fields from the grouping fields, or aggregate functions on the group itself (`GROUP AS` offers more flexibility here, as we'll see later).
-Refer to the AsterixDB documention on grouping [here](https://asterixdb.apache.org/docs/0.9.8/sqlpp/manual.html#Grouping) for more details.
+Refer to the AsterixDB documentation on grouping [here](https://asterixdb.apache.org/docs/0.9.8/sqlpp/manual.html#Grouping) for more details.
 
 * * *
 
@@ -379,7 +397,7 @@ Ordinary Grouping Set
 The following query retrieves how many 1 to 5 hop paths there are for every pair of users.
 ```
 FROM      GRAPH GelpGraph
-MATCH     (u1:User)-[{1,5}]-(u2:User)
+MATCH     (u1:User)-[{1,5}]->(u2:User)
 GROUP BY  u1, u2
 SELECT    u1, u2, COUNT(*) AS cnt;
 ```
@@ -389,7 +407,7 @@ The `GROUP BY` clause will then generate groups for all unique pairs of `u1` and
 ## `HAVING` Clause
 
 `HAVING` clauses serve the same purpose in gSQL++ as they do in SQL++: to filter out _groups_ that do not satisfy a certain condition, specified using aggregates on the group itself.
-Refer to the AsterixDB documention on `HAVING` clauses [here](https://asterixdb.apache.org/docs/0.9.8/sqlpp/manual.html#HAVING_Clause) for more details.
+Refer to the AsterixDB documentation on `HAVING` clauses [here](https://asterixdb.apache.org/docs/0.9.8/sqlpp/manual.html#HAVING_Clause) for more details.
 
 * * *
 
@@ -405,7 +423,7 @@ HAVING Clause
 ## `GROUP AS` Clause
 
 `GROUP AS` clauses serve the same purpose in gSQL++ as they do in SQL++: to preserve all records in a group, as they were before the `GROUP BY` clause.
-Refer to the AsterixDB documention on `GROUP AS` clauses [here](https://asterixdb.apache.org/docs/0.9.8/sqlpp/manual.html#GROUP_AS_Clause) for more details.
+Refer to the AsterixDB documentation on `GROUP AS` clauses [here](https://asterixdb.apache.org/docs/0.9.8/sqlpp/manual.html#GROUP_AS_Clause) for more details.
 
 * * *
 
@@ -419,37 +437,36 @@ GROUP AS Clause
 * * * 
 
 When `GROUP AS` is used in conjunction with navigational pattern matching, one can express a wide array of queries that other languages would either dedicate special syntax for, or expose as a special function.
-The following query asks for the shortest path (of 1 to 5 hops) between two users `u1` and `u2`.
+The following query asks for the shortest path between two users `u1` and `u2`.
 ```
 FROM      GRAPH GelpGraph
-MATCH     (u1:User)-[p:{1,5}]-(u2:User)
+MATCH     (u1:User)-[p+]->(u2:User)
 GROUP BY  u1, u2
 GROUP AS  g
 LET       shortestPath = (
             FROM     g gi
             SELECT   VALUE gi.p
-            ORDER BY LEN(gi.p) ASC
+            ORDER BY HOP_COUNT(gi.p) ASC
             LIMIT    1
           )[0]
 SELECT    u1, u2, shortestPath;
 ```
 In the example above, we specify a subquery that operates on an individual group, as opposed to all paths in the `FROM` clause.
-In doing so, we can easily retrieve the shortest path by sorting our group by path length (`LEN(gi.p)`) and limiting our result set to 1.
+In doing so, we can easily retrieve the shortest path by sorting our group by path length (`HOP_COUNT(gi.p)`) and limiting our result set to 1.
 
-Suppose now we want to modify our previous example to find the _two_ shortest paths (of 1 to 5 hops) that don't involve a certain user.
+Suppose now we want to modify our previous example to find the _two_ shortest paths containing users with the name "Mary".
 The following query modifies only the `shortestPath` subquery from the previous example and nothing else:
 ```
 FROM      GRAPH GelpGraph
-MATCH     (u1:User)-[p:{1,5}]-(u2:User)
+MATCH     (u1:User)-[p:{1,5}]->(u2:User)
 GROUP BY  u1, u2
 GROUP AS  g
 LET       shortestPath = (
             FROM     g gi
             SELECT   VALUE gi.p
-            WHERE    EVERY v IN VERTICES(gi.p)
-                     SATISFIES NOT ( LABEL(v) = "User" AND 
-                                     v.user_id = 4 )
-            ORDER BY LEN(gi.p) ASC
+            WHERE    SOME v IN VERTICES(gi.p)
+                     SATISFIES v.name = "Mary"
+            ORDER BY HOP_COUNT(gi.p) ASC
             LIMIT    2
           )[0]
 SELECT    u1, u2, shortestPath;

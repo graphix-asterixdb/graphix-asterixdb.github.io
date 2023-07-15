@@ -74,7 +74,7 @@ If you have a previous AsterixDB instance and want to execute Graphix queries on
             GD.Dependencies D 
     SELECT  *;
     ```
-    If no errors are raised, then Graphix is sucessfully installed.
+    If no errors are raised, then Graphix is successfully installed.
 
 ## Upgrading AsterixDB for Graphix
 

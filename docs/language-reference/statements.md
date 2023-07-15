@@ -31,6 +31,7 @@ CREATE Statement
     <img src="../../images/CreateStmt.svg" />
 </p>
 {: .code-example }
+<br>
 
 CREATE GRAPH Statement
 {: .text-gamma .fw-500 .lh-0 }
@@ -38,6 +39,7 @@ CREATE GRAPH Statement
     <img src="../../images/CreateGraph.svg" />
 </p>
 {: .code-example }
+<br>
 
 Graph Constructor
 {: .text-gamma .fw-500 .lh-0 }
@@ -45,6 +47,7 @@ Graph Constructor
     <img src="../../images/GraphConstructor.svg" />
 </p>
 {: .code-example }
+<br>
 
 Vertex Constructor
 {: .text-gamma .fw-500 .lh-0 }
@@ -52,7 +55,7 @@ Vertex Constructor
     <img src="../../images/VertexConstructor.svg" />
 </p>
 {: .code-example }
-
+<br>
 
 Vertex Definition
 {: .text-gamma .fw-500 .lh-0 }
@@ -60,6 +63,7 @@ Vertex Definition
     <img src="../../images/VertexDefinition.svg" />
 </p>
 {: .code-example }
+<br>
 
 Edge Constructor
 {: .text-gamma .fw-500 .lh-0 }
@@ -67,6 +71,7 @@ Edge Constructor
     <img src="../../images/EdgeConstructor.svg" />
 </p>
 {: .code-example }
+<br>
 
 Edge Definition
 {: .text-gamma .fw-500 .lh-0 }
@@ -151,6 +156,7 @@ DECLARE Statement
     <img src="../../images/DeclareStmt.svg" />
 </p>
 {: .code-example }
+<br>
 
 DECLARE GRAPH Statement
 {: .text-gamma .fw-500 .lh-0 }
@@ -249,7 +255,7 @@ DELETE Statement
 * * *
 
 gSQL++ also does not directly support the deletion of vertices and edges.
-Users can however use a gSQL++ query to locate the exact record(s) they want to delete.
+Users can, however, use a gSQL++ query to locate the exact record(s) they want to delete.
 Suppose that we want to delete all users that have made reviews for a fake business.
 We can accomplish this deletion using a correlated sub-query:
 

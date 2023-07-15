@@ -58,7 +58,7 @@ Example
 
 Modifies what graph elements can be equal to one another during _navigation_.
 We distinguish between the semantics of pattern matching, which applies to all explicitly specified vertices and edges, and the semantics of navigation, which only applies to vertices and edges traversed through a sub-path.
-By default, navigation is evaluted with the `no-repeated-anything` setting, which does not allow duplicate vertices OR edges to be traversed.
+By default, navigation is evaluated with the `no-repeated-anything` setting, which does not allow duplicate vertices OR edges to be traversed.
 Some form of uniqueness must be specified for navigation to guarantee that cycles are not processed.
 
 No-Repeated-Vertices
@@ -75,34 +75,20 @@ Example
     SET       `graphix.semantics.navigation` "no-repeated-edges";
     
     FROM      GRAPH GelpGraph
-    MATCH     (:User)-[p+]-(:User)
-    LET       vertexIDs = (
-        FROM   PATH_VERTICES(p) pv
-        LET    vertexLabel = LABEL(pv)
-        SELECT CASE WHEN vertexLabel = "User"
-                    THEN pv.user_id
-                    WHEN vertexLabel = "Review"
-                    THEN pv.review_id
-                    WHEN vertexLabel = "Business"
-                    THEN pv.business_id
-               END AS vertexKey, vertexLabel
-              )
-    SELECT    VALUE vertexIDs 
+    MATCH     (:User)-[p+]->(:User)
+    SELECT    ( FROM   VERTICES(p) v
+                SELECT VALUE v.user_id ) AS user_ids,
+              EDGES(p) AS edges
     LIMIT     1;
     ```
     Returns the following:
     ```json
-    [ { "vertexKey": 1,    "vertexLabel": "User" },
-      { "vertexKey": "R1", "vertexLabel": "Review" },
-      { "vertexKey": "B3", "vertexLabel": "Business" },
-      { "vertexKey": "R4", "vertexLabel": "Review" },
-      { "vertexKey": 6,    "vertexLabel": "User" },
-      { "vertexKey": "R2", "vertexLabel": "Review" },
-      { "vertexKey": "B3", "vertexLabel": "Business" },
-      { "vertexKey": "R7", "vertexLabel": "Review" },
-      { "vertexKey": 2,    "vertexLabel": "User" } ]
+    { "user_ids": [ 1, 2, 3, 2 ],
+      "edges": [ { "user_id": 1, "friend": 2 },
+                 { "user_id": 2, "friend": 3 },
+                 { "user_id": 3, "friend": 2 } ] }
     ```
-    Notice how the business `"B3"` appears twice in our list of traversed vertices.
+    Notice how the vertex with ID = `2` appears twice in our path.
     Such a path would not be returned without our `SET` statement.
 
 
@@ -153,26 +139,31 @@ Example
 
 ## Query Hints
 
-### `PATH-EXPAND`
+### `INDEXNL`
 
-If an edge pattern contains a sub-path whose number of hops is _bounded_, then we have two ways we can evaluate our pattern: 
-1. Rewrite our sub-path into a `UNION-ALL` of all possible ways our sub-path could be evaluated. 
-2. Evaluate our sub-path using a dedicated fixed-point operator.
+By default, Graphix chooses to evaluate all JOINs using a hybrid hash JOIN (HHJ).
+For analytical queries with many high-degree vertices, such a JOIN operator makes sense.
+For more interactive queries however (queries that access a small portion of the graph), the cost of scanning an entire dataset to build a hash table might be too prohibitive.
+If there are indexes built on the JOIN field, an alternative JOIN method offered by Graphix is the index nested loop JOIN (INLJ).
+Graphix users can enable this JOIN algorithm by inserting the query hint `+indexnl` into the appropriate places of a vertex, edge, or path pattern.
 
-By default, sub-paths are evaluated using the latter.
-To evaluate an edge pattern using the former, add the query hint after all detail in the pattern itself:
-```
-FROM    GRAPH GelpGraph
-MATCH   (u)-[{1,4} /* +path-expand */]-(v)
-SELECT  u, v;
-```
+Vertex to Edge 
+: To tell Graphix that the `JOIN` used to connect a vertex and an edge should be evaluated with INLJ, insert the `+indexnl` hint immediately before the brackets of an edge (`()-/*+indexnl*/[]-()`) or after the brackets of an edge (`()-[]/*+indexnl*/-()`).
 
-### `PATH-FIXED-POINT`
+Correlated Vertex
+: To tell Graphix that the `JOIN` used to connect a correlated vertex from another `MATCH` clause should be evaluated with INLJ, insert the `+indexnl` immediately before the closing parentheses of the vertex in the nested `MATCH` clause (`(/*+indexnl*/)`).
 
-By default, sub-paths are evaluated using a dedicated fixed-point operator.
-To be explicit in the way your sub-paths are evaluated, you can annotate your sub-path with this hint:
-```
-FROM    GRAPH GelpGraph
-MATCH   (u)-[{1,4} /* +path-fixed-point */]-(v)
-SELECT  u, v;
-```
+Path Navigation
+: To tell Graphix that the `JOIN` used to evaluate each hop of a path should be evaluated with INLJ, insert the `+indexnl` hint immediately before the closing brackets of a path (`()-[+/*+indexnl*/]-()`).
+
+Example
+:   ```
+    FROM      GRAPH GelpGraph
+    MATCH     (u1:User)-[:FRIENDS_WITH{,5}/*+indexnl*/]->(u2:User),
+              (u2)-[:FRIENDS_WITH]/*indexnl*/->(u3:User)
+    WHERE     NOT EXISTS ( FROM   GRAPH GelpGraph
+                           MATCH  (u3/*+indexnl*/)<-/*+indexnl*/-[:MADE_BY]-(:Review)
+                           SELECT 1 )
+    SELECT    u1, u2, u3
+    LIMIT     1;
+    ```

@@ -18,10 +18,11 @@ This page aims to give a high level overview of the software architecture that s
 
 ## Components of Graphix 
 
-For the purpose of this discussion, we divide Graphix into three parts: 
+For the purpose of this discussion, we divide Graphix into four parts: 
 1. gSQL++ Query Parsing
 2. gSQL++ AST Rewriting
 3. Algebricks Plan Optimization
+4. Hyracks Job Execution
 
 With respect to query planning, Graphix / AsterixDB works with queries in four representations:
 1. As a string of tokens, which gets lexed and parsed into ...
@@ -49,4 +50,6 @@ For a detailed explanation on the rewrites a Graphix AST undergoes to be handed 
 ## Algebricks Plan Optimization
 
 For a detailed explanation on Graphix specific Algebricks rules, see [here](../technical-reference/ast.html).
+
+## Hyracks Job Execution
 

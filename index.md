@@ -23,11 +23,11 @@ Not only is setting up an ETL pipeline costly to develop, this option increases 
 
 > _Option 2: Write your graph queries in SQL++ (AsterixDB's query language)._
 
-While this option avoids incurring an additional cost to own your data, the cost to develop and maintain your _queries_ increases. Additionally, certain queries (e.g. reachability) cannot be expressed in native SQL++.
+While this option avoids incurring an additional cost to own your data, the cost to develop and maintain your _queries_ increases. Additionally, certain queries (e.g. reachability, shortest path) cannot be expressed in native SQL++.
 
 > _Option 3: Install Graphix and write your queries in a Graphix-extended flavor of SQL++._
 
 Graphix is meant to offer the developers the best of both worlds.
 You do not have to introduce a new graph database just to write readable, maintainable, and efficient graph queries.
-Futhermore, Graphix offers developers a) physical _and_ logical data independence for your graphs, b) built-in parallel execution (via AsterixDB's existing runtime), and c) all of the existing features AsterixDB already offers (rich set of builtin data types, numerous indexing options, ingestion with feeds, etc...).  
+Furthermore, Graphix offers developers a) physical _and_ logical data independence for your graphs, b) built-in parallel execution (via AsterixDB's existing runtime), and c) all the existing features AsterixDB already offers (rich set of builtin data types, numerous indexing options, ingestion with feeds, etc...).  
 

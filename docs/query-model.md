@@ -18,7 +18,7 @@ A _graph_ is a structure composed of sets of _graph elements_ known as _vertices
 Edges connect exactly two vertices together.
 A _property graph_ has four defining characteristics that differentiate itself from your bog-standard undirected simple graph:
 - Each edge is _directed_.
-  Consequently, given an edge _<u>e</u>_ that connects two vertices, we can talk about the _source vertex_ and the _destination vertex_ of _<u>e</u>_.
+  Consequently, given an edge _<u>e</u>_ that connects two vertices we can talk about the _source vertex_ and the _destination vertex_ of _<u>e</u>_.
 - Each graph element is associated with a _label_.
   In the context of the property graph model labels are used to group vertices with other vertices, and edge with other edges.
 - Two pairs of vertices may be connected by more than one edge.
@@ -98,7 +98,7 @@ There are four common ways we can determine if a pattern actually maps to an ins
     In addition to preserving adjacency, we can also enforce that no two vertices in a mapping are the same.
     If we do not enforce anything else, we describe these semantics as _vertex isomorphism_, or _no repeated vertices_.
 3. **No repeated edges**
-    Similiarly, we can impose a uniqueness constraint on the edges of a mapping.
+    Similarly, we can impose a uniqueness constraint on the edges of a mapping.
     If we preserve adjacency and only constrain that edges of a mapping must be unique, then we describe these semantics as _edge isomorphism_, or _no repeated edges_.
 4. **No repeated anything**
     Finally, we reach the strictest way we can determine a mapping: preserve adjacency, and ensure that no edge _and_ vertex is repeated.
@@ -138,7 +138,7 @@ There are four common approaches to path finding:
     The least restrictive approach to path query evaluation is to simply consider all paths.
     Under these semantics, we may encounter an infinite number of paths if cycles exist.
     To practically consider such an approach, we could choose to bound the number of paths we yield.
-    We describe these semantics as _abitrary path_ or _all path_.
+    We describe these semantics as _arbitrary path_ or _all path_.
 2. **Path w/ no-repeated-vertices**
     The biggest issue with the previous evaluation approach is that we consider cycles.
     In most cases though, we can live without considering cycles in our result.
@@ -155,7 +155,7 @@ There are four common approaches to path finding:
 
 ### Navigational Pattern Matching Queries
 The two prior sections describe two distinct classes of graph queries, though it's easy to see how we create queries that involve both pattern matching and path finding (with regular expressions).
-The superclass of queries described here are known formally as _conjunctive regular path queries_, or _navigational pattern matching queries_.
+The superclass of queries described here is known formally as _conjunctive regular path queries_, or _navigational pattern matching queries_.
 To extend the _FRIENDS_WITH_ example from the previous section, suppose we are now interested in finding such a path between _any_ pair of users that have made a review.
 Graphically, we describe our query as such:
 

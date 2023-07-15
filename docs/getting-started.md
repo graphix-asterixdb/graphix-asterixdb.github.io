@@ -26,7 +26,7 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
 ## Building AsterixDB Datasets
 
 1. For our tutorial we use the "Gelp" example, where **Users** and their friends make **Reviews** about **Businesses**.
-    To start, let's create a new dataverse and all of the aforementioned entities as datasets.
+    To start, let's create a new dataverse and all the aforementioned entities as datasets.
     ```
     CREATE DATAVERSE  Gelp;
     USE               Gelp;
@@ -57,7 +57,7 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     ];
     ```
     The three records inserted show two fields that were not defined in the `BusinessesType` data type: `name` and `number`.
-    The last record illustrates the potential heterogenity enabled by AsterixDB's document data model, where some businesses may not have a number attached to them.
+    The last record illustrates the potential heterogeneity enabled by AsterixDB's document data model, where some businesses may not have a number attached to them.
 3. Having populated our `Businesses` dataset, let's now move onto our `Users`:
     ```
     INSERT INTO   Gelp.Users [
@@ -285,12 +285,12 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     SELECT  { "review_id": R.review_id, "business_id": R.business_id } AS a;
     ```
 
-3. Suppose that we now want to find whether or not two users are connected by some number of friends in our graph.
+3. Suppose that we now want to find whether two users are connected by some number of friends in our graph.
     In this scenario, we need to describe a _path_ between two vertices instead of an edge.
     We build the following gSQL++ query:
     ```
     FROM      GRAPH Gelp.GelpGraph
-    MATCH     (u1:User)-[f:FRIENDS_WITH{1,4}]->(u2:User)
+    MATCH     (u1:User)-[f:FRIENDS_WITH+]->(u2:User)
     LET       pathIDs = ( FROM   VERTICES(f) fv
                           SELECT VALUE fv.user_id )
     SELECT    u1.user_id AS u1_user_id,
@@ -324,15 +324,14 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     ... 
     ```
     The query above illustrates a _navigational graph pattern_, where `f` corresponds to a path instead of an edge.
-    Vertices of path are accessed using the `PATH_VERTICES` function, and edges of a path are accessed using the `PATH_EDGES` function.
-    Graphix currently requires a limit on the number of hops in the path, but we are working on an unbounded navigational query pattern solution.
+    Vertices of path are accessed using the `VERTICES` function, and edges of a path are accessed using the `EDGES` function.
    
 4. Note the large amount of results in the previous result set (emphasized with the `...`).
     Let's expand on the previous scenario: suppose we are not interested in multiple paths between the same two users, but instead we are interested in the _shortest_ path.
     We build the following gSQL++ query, taking advantage of how SQL++ treats grouping:
     ```
     FROM      GRAPH Gelp.GelpGraph
-    MATCH     (u1:User)-[f:FRIENDS_WITH{1,4}]->(u2:User)
+    MATCH     (u1:User)-[f:FRIENDS_WITH+]->(u2:User)
     GROUP BY  u1, u2
     GROUP AS  g
     LET       shortestPath = (
@@ -340,7 +339,7 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
         LET      pathIDs = ( FROM    VERTICES(gi.f) fv
                              SELECT  VALUE fv.user_id )
         SELECT   VALUE pathIDs 
-        ORDER BY PATH_HOP_COUNT(gi.f) ASC
+        ORDER BY HOP_COUNT(gi.f) ASC
         LIMIT    1
     )[0]
     SELECT    u1.user_id AS u1_user_id,
