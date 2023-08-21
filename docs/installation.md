@@ -36,8 +36,10 @@ If you have a previous AsterixDB instance and want to execute Graphix queries on
 
 ## Building Graphix + AsterixDB from Source
 
+{: .warning }
 This process is out-of-date.
-{: .label .label-red }
+We are currently merging several patches into the main AsterixDB branch that enable recursion.
+For the most up-to-date Graphix, use the pre-built package above.
 
 1. Clone the AsterixDB git repository: [https://github.com/apache/asterixdb](https://github.com/apache/asterixdb).
     ```bash

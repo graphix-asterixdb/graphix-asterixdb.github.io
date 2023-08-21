@@ -188,9 +188,33 @@ SET `graphix.evaluation.minimize-joins` "true";
 
 ### `evaluation.prefer-indexnl` Setting
 
-For users with a very interactive workload (i.e. one that accesses a small portion of the overall graph), we 
+For users with a very interactive workload (i.e. one that accesses a small portion of the overall graph), a pure index nested-loop JOIN approach toward evaluating your query may be preferable.
+This setting will annotate all Graphix induced JOINs with the index nested-loop JOIN hint (see the section on [Query Hints](#query-hints) for more detail).
+By default, this setting is disabled (set to `"false"`).
+```
+SET `graphix.evaluation.prefer-indexnl` "true";
+```
 
 ### `compiler.lukmemory` Setting
+
+To avoid enumerating all paths, Graphix is able to recognize when a user specifies a query that only requires to know about the existence of some path.
+An example of such a query is given below:
+```
+FROM
+    GRAPH GelpGraph
+        (u1:User)-[:FRIENDS_WITH*]->(u2:User)
+SELECT DISTINCT
+    u1.user_id AS u1_user_id,
+    u2.user_id AS u2_user_id;
+```
+The `SELECT DISTINCT` allows Graphix to make an optimization to "stop early" when any path between `u1` and `u2` is found.
+After recognition (during compilation), Graphix inserts a hash-partitioned `DISTINCT` operator on the vertex endpoints of the path into the recursive portion of a query plan.
+This hash-partitioned `DISTINCT` operator has a memory budget to remember the vertex endpoints the operator has seen.
+Similar to an LSM tree, once this budget is exceeded, this `DISTINCT` operator flushes its in-memory data structure to disk and proceeds to a) populate a new in-memory data structure for writes, and b) searches the flushed data structure (and its current in-memory data structure) for reads.
+This setting modifies the default memory budget, which might be helpful in minimizing the amount of disk I/O during query processing.
+```
+SET `graphix.compiler.lukmemory` "192KB";
+```
 
 ## Query Hints
 

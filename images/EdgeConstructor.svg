@@ -1,177 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="975" height="191">
+<svg xmlns="http://www.w3.org/2000/svg" width="641" height="81">
    <defs>
       <style type="text/css">
     @namespace "http://www.w3.org/2000/svg";
-    .line                 {fill: none; stroke: #332900; stroke-width: 1;}
-    .bold-line            {stroke: #141000; shape-rendering: crispEdges; stroke-width: 2;}
-    .thin-line            {stroke: #1F1800; shape-rendering: crispEdges}
-    .filled               {fill: #332900; stroke: none;}
+    .line                 {fill: none; stroke: #332200; stroke-width: 1;}
+    .bold-line            {stroke: #140E00; shape-rendering: crispEdges; stroke-width: 2;}
+    .thin-line            {stroke: #1F1400; shape-rendering: crispEdges}
+    .filled               {fill: #332200; stroke: none;}
     text.terminal         {font-family: Verdana, Sans-serif;
                             font-size: 12px;
-                            fill: #141000;
+                            fill: #140E00;
                             font-weight: bold;
                           }
     text.nonterminal      {font-family: Verdana, Sans-serif;
                             font-size: 12px;
-                            fill: #1A1400;
+                            fill: #1A1100;
                             font-weight: normal;
                           }
     text.regexp           {font-family: Verdana, Sans-serif;
                             font-size: 12px;
-                            fill: #1F1800;
+                            fill: #1F1400;
                             font-weight: normal;
                           }
-    rect, circle, polygon {fill: #332900; stroke: #332900;}
-    rect.terminal         {fill: #FFDB4D; stroke: #332900; stroke-width: 1;}
-    rect.nonterminal      {fill: #FFEC9E; stroke: #332900; stroke-width: 1;}
+    rect, circle, polygon {fill: #332200; stroke: #332200;}
+    rect.terminal         {fill: #FFC34D; stroke: #332200; stroke-width: 1;}
+    rect.nonterminal      {fill: #FFDF9E; stroke: #332200; stroke-width: 1;}
     rect.text             {fill: none; stroke: none;}
-    polygon.regexp        {fill: #FFF4C7; stroke: #332900; stroke-width: 1;}
+    polygon.regexp        {fill: #FFECC7; stroke: #332200; stroke-width: 1;}
   </style>
    </defs>
-   <polygon points="9 61 1 57 1 65"/>
-   <polygon points="17 61 9 57 9 65"/>
+   <polygon points="9 17 1 13 1 21"/>
+   <polygon points="17 17 9 13 9 21"/>
    <a xmlns:xlink="http://www.w3.org/1999/xlink"
        xlink:href="#EdgeDefinition"
        xlink:title="EdgeDefinition">
-      <rect x="31" y="47" width="112" height="32"/>
-      <rect x="29" y="45" width="112" height="32" class="nonterminal"/>
-      <text class="nonterminal" x="39" y="65">EdgeDefinition</text>
+      <rect x="31" y="3" width="112" height="32"/>
+      <rect x="29" y="1" width="112" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="39" y="21">EdgeDefinition</text>
    </a>
-   <rect x="163" y="47" width="76" height="32" rx="10"/>
-   <rect x="161"
-          y="45"
-          width="76"
-          height="32"
-          class="terminal"
-          rx="10"/>
-   <text class="terminal" x="171" y="65">SOURCE</text>
-   <rect x="259" y="47" width="46" height="32" rx="10"/>
-   <rect x="257"
-          y="45"
-          width="46"
-          height="32"
-          class="terminal"
-          rx="10"/>
-   <text class="terminal" x="267" y="65">KEY</text>
-   <rect x="325" y="47" width="26" height="32" rx="10"/>
-   <rect x="323"
-          y="45"
-          width="26"
-          height="32"
-          class="terminal"
-          rx="10"/>
-   <text class="terminal" x="333" y="65">(</text>
    <a xmlns:xlink="http://www.w3.org/1999/xlink"
-       xlink:href="#NestedField"
-       xlink:title="NestedField">
-      <rect x="391" y="47" width="94" height="32"/>
-      <rect x="389" y="45" width="94" height="32" class="nonterminal"/>
-      <text class="nonterminal" x="399" y="65">NestedField</text>
+       xlink:href="#EdgeConstructorDetail"
+       xlink:title="EdgeConstructorDetail">
+      <rect x="163" y="3" width="162" height="32"/>
+      <rect x="161" y="1" width="162" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="171" y="21">EdgeConstructorDetail</text>
    </a>
-   <rect x="391" y="3" width="24" height="32" rx="10"/>
-   <rect x="389"
+   <rect x="345" y="3" width="38" height="32" rx="10"/>
+   <rect x="343"
           y="1"
-          width="24"
-          height="32"
-          class="terminal"
-          rx="10"/>
-   <text class="terminal" x="399" y="21">,</text>
-   <rect x="525" y="47" width="26" height="32" rx="10"/>
-   <rect x="523"
-          y="45"
-          width="26"
-          height="32"
-          class="terminal"
-          rx="10"/>
-   <text class="terminal" x="533" y="65">)</text>
-   <rect x="571" y="47" width="116" height="32" rx="10"/>
-   <rect x="569"
-          y="45"
-          width="116"
-          height="32"
-          class="terminal"
-          rx="10"/>
-   <text class="terminal" x="579" y="65">DESTINATION</text>
-   <rect x="707" y="47" width="46" height="32" rx="10"/>
-   <rect x="705"
-          y="45"
-          width="46"
-          height="32"
-          class="terminal"
-          rx="10"/>
-   <text class="terminal" x="715" y="65">KEY</text>
-   <rect x="773" y="47" width="26" height="32" rx="10"/>
-   <rect x="771"
-          y="45"
-          width="26"
-          height="32"
-          class="terminal"
-          rx="10"/>
-   <text class="terminal" x="781" y="65">(</text>
-   <a xmlns:xlink="http://www.w3.org/1999/xlink"
-       xlink:href="#NestedField"
-       xlink:title="NestedField">
-      <rect x="839" y="47" width="94" height="32"/>
-      <rect x="837" y="45" width="94" height="32" class="nonterminal"/>
-      <text class="nonterminal" x="847" y="65">NestedField</text>
-   </a>
-   <rect x="839" y="3" width="24" height="32" rx="10"/>
-   <rect x="837"
-          y="1"
-          width="24"
-          height="32"
-          class="terminal"
-          rx="10"/>
-   <text class="terminal" x="847" y="21">,</text>
-   <rect x="633" y="113" width="26" height="32" rx="10"/>
-   <rect x="631"
-          y="111"
-          width="26"
-          height="32"
-          class="terminal"
-          rx="10"/>
-   <text class="terminal" x="641" y="131">)</text>
-   <rect x="679" y="113" width="38" height="32" rx="10"/>
-   <rect x="677"
-          y="111"
           width="38"
           height="32"
           class="terminal"
           rx="10"/>
-   <text class="terminal" x="687" y="131">AS</text>
+   <text class="terminal" x="353" y="21">AS</text>
    <a xmlns:xlink="http://www.w3.org/1999/xlink"
        xlink:href="#Selection"
        xlink:title="Selection">
-      <rect x="757" y="113" width="78" height="32"/>
-      <rect x="755" y="111" width="78" height="32" class="nonterminal"/>
-      <text class="nonterminal" x="765" y="131">Selection</text>
+      <rect x="423" y="3" width="78" height="32"/>
+      <rect x="421" y="1" width="78" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="431" y="21">Selection</text>
    </a>
-   <rect x="757" y="157" width="26" height="32" rx="10"/>
-   <rect x="755"
-          y="155"
+   <rect x="423" y="47" width="26" height="32" rx="10"/>
+   <rect x="421"
+          y="45"
           width="26"
           height="32"
           class="terminal"
           rx="10"/>
-   <text class="terminal" x="765" y="175">(</text>
+   <text class="terminal" x="431" y="65">(</text>
    <a xmlns:xlink="http://www.w3.org/1999/xlink"
        xlink:href="#Selection"
        xlink:title="Selection">
-      <rect x="803" y="157" width="78" height="32"/>
-      <rect x="801" y="155" width="78" height="32" class="nonterminal"/>
-      <text class="nonterminal" x="811" y="175">Selection</text>
+      <rect x="469" y="47" width="78" height="32"/>
+      <rect x="467" y="45" width="78" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="477" y="65">Selection</text>
    </a>
-   <rect x="901" y="157" width="26" height="32" rx="10"/>
-   <rect x="899"
-          y="155"
+   <rect x="567" y="47" width="26" height="32" rx="10"/>
+   <rect x="565"
+          y="45"
           width="26"
           height="32"
           class="terminal"
           rx="10"/>
-   <text class="terminal" x="909" y="175">)</text>
+   <text class="terminal" x="575" y="65">)</text>
    <path class="line"
-          d="m17 61 h2 m0 0 h10 m112 0 h10 m0 0 h10 m76 0 h10 m0 0 h10 m46 0 h10 m0 0 h10 m26 0 h10 m20 0 h10 m94 0 h10 m-134 0 l20 0 m-1 0 q-9 0 -9 -10 l0 -24 q0 -10 10 -10 m114 44 l20 0 m-20 0 q10 0 10 -10 l0 -24 q0 -10 -10 -10 m-114 0 h10 m24 0 h10 m0 0 h70 m20 44 h10 m26 0 h10 m0 0 h10 m116 0 h10 m0 0 h10 m46 0 h10 m0 0 h10 m26 0 h10 m20 0 h10 m94 0 h10 m-134 0 l20 0 m-1 0 q-9 0 -9 -10 l0 -24 q0 -10 10 -10 m114 44 l20 0 m-20 0 q10 0 10 -10 l0 -24 q0 -10 -10 -10 m-114 0 h10 m24 0 h10 m0 0 h70 m22 44 l2 0 m2 0 l2 0 m2 0 l2 0 m-364 66 l2 0 m2 0 l2 0 m2 0 l2 0 m2 0 h10 m26 0 h10 m0 0 h10 m38 0 h10 m20 0 h10 m78 0 h10 m0 0 h92 m-210 0 h20 m190 0 h20 m-230 0 q10 0 10 10 m210 0 q0 -10 10 -10 m-220 10 v24 m210 0 v-24 m-210 24 q0 10 10 10 m190 0 q10 0 10 -10 m-200 10 h10 m26 0 h10 m0 0 h10 m78 0 h10 m0 0 h10 m26 0 h10 m23 -44 h-3"/>
-   <polygon points="965 127 973 123 973 131"/>
-   <polygon points="965 127 957 123 957 131"/>
+          d="m17 17 h2 m0 0 h10 m112 0 h10 m0 0 h10 m162 0 h10 m0 0 h10 m38 0 h10 m20 0 h10 m78 0 h10 m0 0 h92 m-210 0 h20 m190 0 h20 m-230 0 q10 0 10 10 m210 0 q0 -10 10 -10 m-220 10 v24 m210 0 v-24 m-210 24 q0 10 10 10 m190 0 q10 0 10 -10 m-200 10 h10 m26 0 h10 m0 0 h10 m78 0 h10 m0 0 h10 m26 0 h10 m23 -44 h-3"/>
+   <polygon points="631 17 639 13 639 21"/>
+   <polygon points="631 17 623 13 623 21"/>
 </svg>

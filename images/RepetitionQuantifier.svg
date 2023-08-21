@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="551" height="113">
+<svg xmlns="http://www.w3.org/2000/svg" width="551" height="157">
    <defs>
       <style type="text/css">
     @namespace "http://www.w3.org/2000/svg";
-    .line                 {fill: none; stroke: #332900; stroke-width: 1;}
-    .bold-line            {stroke: #141000; shape-rendering: crispEdges; stroke-width: 2;}
-    .thin-line            {stroke: #1F1800; shape-rendering: crispEdges}
-    .filled               {fill: #332900; stroke: none;}
+    .line                 {fill: none; stroke: #332200; stroke-width: 1;}
+    .bold-line            {stroke: #140E00; shape-rendering: crispEdges; stroke-width: 2;}
+    .thin-line            {stroke: #1F1400; shape-rendering: crispEdges}
+    .filled               {fill: #332200; stroke: none;}
     text.terminal         {font-family: Verdana, Sans-serif;
                             font-size: 12px;
-                            fill: #141000;
+                            fill: #140E00;
                             font-weight: bold;
                           }
     text.nonterminal      {font-family: Verdana, Sans-serif;
                             font-size: 12px;
-                            fill: #1A1400;
+                            fill: #1A1100;
                             font-weight: normal;
                           }
     text.regexp           {font-family: Verdana, Sans-serif;
                             font-size: 12px;
-                            fill: #1F1800;
+                            fill: #1F1400;
                             font-weight: normal;
                           }
-    rect, circle, polygon {fill: #332900; stroke: #332900;}
-    rect.terminal         {fill: #FFDB4D; stroke: #332900; stroke-width: 1;}
-    rect.nonterminal      {fill: #FFEC9E; stroke: #332900; stroke-width: 1;}
+    rect, circle, polygon {fill: #332200; stroke: #332200;}
+    rect.terminal         {fill: #FFC34D; stroke: #332200; stroke-width: 1;}
+    rect.nonterminal      {fill: #FFDF9E; stroke: #332200; stroke-width: 1;}
     rect.text             {fill: none; stroke: none;}
-    polygon.regexp        {fill: #FFF4C7; stroke: #332900; stroke-width: 1;}
+    polygon.regexp        {fill: #FFECC7; stroke: #332200; stroke-width: 1;}
   </style>
    </defs>
    <polygon points="9 17 1 13 1 21"/>
@@ -77,8 +77,16 @@
           class="terminal"
           rx="10"/>
    <text class="terminal" x="59" y="97">+</text>
+   <rect x="51" y="123" width="28" height="32" rx="10"/>
+   <rect x="49"
+          y="121"
+          width="28"
+          height="32"
+          class="terminal"
+          rx="10"/>
+   <text class="terminal" x="59" y="141">*</text>
    <path class="line"
-          d="m17 17 h2 m20 0 h10 m28 0 h10 m20 0 h10 m0 0 h116 m-146 0 h20 m126 0 h20 m-166 0 q10 0 10 10 m146 0 q0 -10 10 -10 m-156 10 v12 m146 0 v-12 m-146 12 q0 10 10 10 m126 0 q10 0 10 -10 m-136 10 h10 m106 0 h10 m20 -32 h10 m24 0 h10 m20 0 h10 m0 0 h116 m-146 0 h20 m126 0 h20 m-166 0 q10 0 10 10 m146 0 q0 -10 10 -10 m-156 10 v12 m146 0 v-12 m-146 12 q0 10 10 10 m126 0 q10 0 10 -10 m-136 10 h10 m106 0 h10 m20 -32 h10 m28 0 h10 m-492 0 h20 m472 0 h20 m-512 0 q10 0 10 10 m492 0 q0 -10 10 -10 m-502 10 v56 m492 0 v-56 m-492 56 q0 10 10 10 m472 0 q10 0 10 -10 m-482 10 h10 m30 0 h10 m0 0 h422 m23 -76 h-3"/>
+          d="m17 17 h2 m20 0 h10 m28 0 h10 m20 0 h10 m0 0 h116 m-146 0 h20 m126 0 h20 m-166 0 q10 0 10 10 m146 0 q0 -10 10 -10 m-156 10 v12 m146 0 v-12 m-146 12 q0 10 10 10 m126 0 q10 0 10 -10 m-136 10 h10 m106 0 h10 m20 -32 h10 m24 0 h10 m20 0 h10 m0 0 h116 m-146 0 h20 m126 0 h20 m-166 0 q10 0 10 10 m146 0 q0 -10 10 -10 m-156 10 v12 m146 0 v-12 m-146 12 q0 10 10 10 m126 0 q10 0 10 -10 m-136 10 h10 m106 0 h10 m20 -32 h10 m28 0 h10 m-492 0 h20 m472 0 h20 m-512 0 q10 0 10 10 m492 0 q0 -10 10 -10 m-502 10 v56 m492 0 v-56 m-492 56 q0 10 10 10 m472 0 q10 0 10 -10 m-482 10 h10 m30 0 h10 m0 0 h422 m-482 -10 v20 m492 0 v-20 m-492 20 v24 m492 0 v-24 m-492 24 q0 10 10 10 m472 0 q10 0 10 -10 m-482 10 h10 m28 0 h10 m0 0 h424 m23 -120 h-3"/>
    <polygon points="541 17 549 13 549 21"/>
    <polygon points="541 17 533 13 533 21"/>
 </svg>

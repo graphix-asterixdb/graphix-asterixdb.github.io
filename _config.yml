@@ -11,3 +11,7 @@ logo: "/images/graphix-logo-text.svg"
 color_scheme: "graphix"
 search_enabled: true
 gh_edit_link: false
+callouts:
+  warning:
+    title: Warning
+    color: red

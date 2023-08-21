@@ -339,7 +339,7 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
         u1_user_id, 
         u2_user_id;
     ```
-    Issuing the query above yields the following results:
+    Issuing the query above yields the following results (shortened for brevity):
     ```json
     { "u1_user_id": 1, "u2_user_id": 2, "pathIDs": [ 1, 2 ] }
     { "u1_user_id": 1, "u2_user_id": 3, "pathIDs": [ 1, 2, 3 ] }
@@ -362,12 +362,12 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     { "u1_user_id": 3, "u2_user_id": 4, "pathIDs": [ 3, 2, 4 ] }
     { "u1_user_id": 3, "u2_user_id": 4, "pathIDs": [ 3, 5, 4 ] }
     { "u1_user_id": 3, "u2_user_id": 5, "pathIDs": [ 3, 5 ] }
-    ......
     ```
+    
     The query above illustrates a _navigational graph pattern_, where `f` corresponds to a path instead of an edge.
     Vertices of a path are accessed using the `VERTICES` function, and edges of a path are accessed using the `EDGES` function.
    
-4. Note the large number of results in the previous result set (emphasized with the `...`).
+4. The previous query yields a large number of results (too many to display here).
     Let's expand on the previous scenario: suppose we are not interested in multiple paths between the same two users, but instead we are interested in the _shortest_ path.
     We build the following gSQL++ query, taking advantage of how SQL++ treats grouping:
     ```

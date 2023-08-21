@@ -176,13 +176,7 @@ Navigational pattern matching provides the foundation of most graph query langua
 ## Graphix Query Model
 Having described the property graph model and common classes of queries on property graphs, let us now describe the query model for Graphix.
 **All** gSQL++ queries return ADM (Asterix data model, a superset of JSON) instances.
-gSQL++ paths in particular refer to a JSON object following the structure below:
-```json
-{
-    "Vertices": [...],
-    "Edges": [...]
-}
-```
+gSQL++ paths in particular refer to a JSON object of two fields (`Vertices` and `Edges`), each of which contains an array of objects (for ease of use, Graphix users can access the vertices and edges of a path using the `PATH_VERTICES` and `PATH_EDGES` functions respectively instead of using a field-accessor to "Vertices" / "Edges").
 
 With respect to pattern matching semantics, Graphix (by default) will not repeat vertices or edges in a pattern.
 With respect to path finding, Graphix (by default) will consider all paths that do not repeat vertices or edges.
