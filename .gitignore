@@ -11,5 +11,6 @@ Gemfile.lock
 
 # ...as well as our tools.
 .DS_Store
+.idea
 tools/*
 !tools/bottlecaps.py

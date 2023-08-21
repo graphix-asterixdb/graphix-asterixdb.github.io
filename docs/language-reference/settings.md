@@ -1,14 +1,14 @@
 ---
 layout: default
 title: Query Tuning 
-parent: Language Reference
+parent: Extension Reference
 nav_order: 4
 ---
 
 # Query Tuning
 {: .no_toc }
 
-This page details Graphix-specific compiler settings and hints that can be set on a per-request basis.
+This page details Graphix-specific compiler settings and hints that can be set on a per-request basis OR globally in the configuration file.
 
 ## Table of Contents
 {: .no_toc .text-delta }
@@ -18,7 +18,7 @@ This page details Graphix-specific compiler settings and hints that can be set o
 
 ## Compiler Settings
 
-### `GRAPHIX.SEMANTICS.PATTERN`
+### `semantics.pattern` Setting
 
 Modifies what graph elements are allowed to be equal to one another during _pattern matching_.
 By default, pattern matching is evaluated with the `"isomorphism"` setting, which does not allow duplicate vertices OR edges.
@@ -38,14 +38,19 @@ Isomorphism
 
 Example
 :   ```
-    SET       `graphix.semantics.pattern` "homomorphism";
+    SET `graphix.semantics.pattern` "homomorphism";
     
-    FROM      GRAPH GelpGraph
-    MATCH     (m:User)-(:Review)-(n:User)
-    SELECT    m.user_id AS m_user_id,
-              n.user_id AS n_user_id
-    ORDER BY  m_user_id, n_user_id
-    LIMIT     1;
+    FROM      
+        GRAPH GelpGraph
+            (m:User)-(:Review)-(n:User)
+    SELECT    
+        m.user_id AS m_user_id,
+        n.user_id AS n_user_id
+    ORDER BY  
+        m_user_id, 
+        n_user_id
+    LIMIT     
+        1;
     ```
     Returns the following:
     ```json
@@ -54,10 +59,10 @@ Example
     The result above would not have shown up without our `SET` statement.
 
 
-### `GRAPHIX.SEMANTICS.NAVIGATION`
+### `semantics.navigation` Setting
 
 Modifies what graph elements can be equal to one another during _navigation_.
-We distinguish between the semantics of pattern matching, which applies to all explicitly specified vertices and edges, and the semantics of navigation, which only applies to vertices and edges traversed through a sub-path.
+We distinguish between the semantics of pattern matching, which applies to all explicitly specified vertices and edges, and the semantics of navigation, which only applies to vertices and edges traversed through a path.
 By default, navigation is evaluated with the `no-repeated-anything` setting, which does not allow duplicate vertices OR edges to be traversed.
 Some form of uniqueness must be specified for navigation to guarantee that cycles are not processed.
 
@@ -72,14 +77,17 @@ No-Repeated-Anything
 
 Example
 :   ```
-    SET       `graphix.semantics.navigation` "no-repeated-edges";
-    
-    FROM      GRAPH GelpGraph
-    MATCH     (:User)-[p+]->(:User)
-    SELECT    ( FROM   VERTICES(p) v
-                SELECT VALUE v.user_id ) AS user_ids,
-              EDGES(p) AS edges
-    LIMIT     1;
+    SET `graphix.semantics.navigation` "no-repeated-edges";
+    FROM      
+        GRAPH GelpGraph
+            (:User)-[p+]->(:User)
+    LET
+        user_ids = ( FROM VERTICES(p) v SELECT VALUE v.user_id )
+    SELECT    
+        user_ids AS user_ids,
+        EDGES(p) AS edges
+    LIMIT     
+        1;
     ```
     Returns the following:
     ```json
@@ -91,60 +99,153 @@ Example
     Notice how the vertex with ID = `2` appears twice in our path.
     Such a path would not be returned without our `SET` statement.
 
+### `evaluation.minimize-joins` Setting
 
+In both Graphix and AsterixDB, referential integrity is not maintained (i.e. foreign keys cannot be enforced).
+As an example, consider the following `Gelp` graph instance:
+```
+CREATE TYPE UsersType AS { user_id: bigint, friend: bigint };
+CREATE DATASET Users (UsersType) PRIMARY KEY user_id;
+CREATE GRAPH UsersGraph AS 
+    VERTEX (:User)
+        PRIMARY KEY (user_id)
+        AS Users,
+    EDGE (:User)-[:FRIENDS_WITH]->(:User)
+        SOURCE KEY      (user_id)
+        DESTINATION KEY (friend)
+        AS ( 
+            FROM    
+                Gelp.Users U,
+                U.friends F
+            SELECT  
+                F         AS friend,
+                U.user_id AS user_id
+        )
 
-### `GRAPHIX.LOG-REWRITE`
+INSERT INTO Users [
+    { "user_id": 1, "friends": [ 2 ] },
+    { "user_id": 2, "friends": [ 3 ] }
+];
+```
+Notice how the last friend in the `Users` dataset (`"friends": [ 3 ]`) does not exist.
+Now let's take a look at a simple query on our graph to find the user IDs of all friends:
+```
+FROM 
+    GRAPH UsersGraph
+        (u1:User)-[fw:FRIENDS_WITH]->(u2:User)
+SELECT
+    u1.user_id AS u1_user_id,
+    u2.user_id AS u2_user_id;
+```
 
-Prints and logs the normalized gSQL++ (an _almost_ valid SQL++ query) to the log file right before the query is transformed into a logical plan.
-This setting is particularly useful when debugging gSQL++ queries.
-By default, this setting is turned off (i.e. set to `"false"`).
+The query above translates into the pure SQL++ query below:
+```
+FROM
+    Users u1,
+    u1.friends u1f,
+    Users u2,
+LET
+    fw = {
+        "user_id": u1.user_id,
+        "friend": u1f
+    }
+WHERE
+    u1.user_id = fw.user_id AND
+    fw.friend = u2.user_id
+SELECT
+    u1.user_id AS u1_user_id,
+    u2.user_id AS u2_user_id
+```
+which would yield the single result below (because user 3 does not exist):
+```json
+{ "u1_user_id": 1, "u2_user_id": 2 }
+```
 
-Example
-:   ```
-    SET     `graphix.log-rewrite` "true";
-    FROM    GRAPH GelpGraph
-    MATCH   (u:User)-(v:User)
-    SELECT  u, v;
-    ```
-    Would display the following (unformatted) string in your cluster controller's console output / log file:
-    ```
-    ( SELECT      `u` AS `u`, `v` AS `v`
-      FROM        `Yelp`.`Users` AS `GGV_2`
-      WITH        `GGV_3` = ( `GGV_2` )
-      WITH        `v` = ( `GGV_2` )
-      UNNEST      `GGV_2`.`friends` AS `GGV_5`
-      WITH        `GGV_4` = ( { "user_id" : `GGV_2`.`user_id`, "friend" : `GGV_5` } )
-      INNER JOIN  `Yelp`.`Users` AS `GGV_6`
-      ON          `GGV_4`.`friend` = `GGV_6`.`user_id`
-      WITH        `GGV_6` != `GGV_2`
-      WITH        `GGV_7` = ( `GGV_6` )
-      WITH        `u` = ( `GGV_6` )
-      WITH        `GGV_1` = ( { "user_id" : `GGV_2`.`user_id`, "friend" : `GGV_5` } )
+Now suppose we make a slight change to the query to remove the `fw.friend = u2.user_id` JOIN:
+```
+FROM
+    Users u1,
+    u1.friends u1f
+LET
+    fw = {
+        "user_id": u1.user_id,
+        "friend": u1f
+    }
+SELECT
+    u1.user_id AS u1_user_id,
+    fw.friend  AS u2_user_id
+```
+If we were to execute this query, we would get the following _incorrect_ results:
+```json
+{ "u1_user_id": 1, "u2_user_id": 2 }
+{ "u1_user_id": 2, "u2_user_id": 3 }
+```
+_However_, if your data is devoid of these edge cases, this JOIN pruning rewrite might greatly improve your query performance.
+By default, Graphix will perform a minimum of two JOINs (one to connect the source vertex and one to connect the destination vertex) per edge -- but if you are confident that your data has valid references, then toggle this JOIN pruning rewrite with the `graphix.evaluation.minimize-joins` setting:
+```
+SET `graphix.evaluation.minimize-joins` "true";
+```
 
-      UNION ALL  
+### `evaluation.prefer-indexnl` Setting
 
-      SELECT      `u` AS `u`, `v` AS `v`
-      FROM        `Yelp`.`Users` AS `GGV_8`
-      WITH        `GGV_9` = ( `GGV_8` )
-      WITH        `u` = ( `GGV_8` )
-      UNNEST      `GGV_8`.`friends` AS `GGV_11`
-      WITH        `GGV_10` = ( { "user_id" : `GGV_8`.`user_id`, "friend" : `GGV_11` } )
-      INNER JOIN  `Yelp`.`Users` AS `GGV_12`
-      ON          `GGV_10`.`friend` = `GGV_12`.`user_id`
-      WITH        `GGV_8` != `GGV_12`
-      WITH        `GGV_13` = ( `GGV_12` )
-      WITH        `v` = ( `GGV_12` )
-      WITH        `GGV_1` = ( { "user_id" : `GGV_8`.`user_id`, "friend" : `GGV_11` } ) ) ;
-    ```
+For users with a very interactive workload (i.e. one that accesses a small portion of the overall graph), we 
+
+### `compiler.lukmemory` Setting
 
 ## Query Hints
 
-### `INDEXNL`
+By default, Graphix uses AsterixDB's CBO (cost-based-optimizer) to determine 1) which order to perform JOINs in, and 2) which algorithm to use for each JOIN.
+For more fine-grained control over the JOIN algorithm used for each pattern, users can specify JOIN hints.
 
-By default, Graphix chooses to evaluate all JOINs using a hybrid hash JOIN (HHJ).
-For analytical queries with many high-degree vertices, such a JOIN operator makes sense.
-For more interactive queries however (queries that access a small portion of the graph), the cost of scanning an entire dataset to build a hash table might be too prohibitive.
-If there are indexes built on the JOIN field, an alternative JOIN method offered by Graphix is the index nested loop JOIN (INLJ).
+### `+hashjoin` Hint
+
+When AsterixDB's CBO is disabled, JOINs are evaluated using a hybrid hash JOIN algorithm by default.
+This algorithm involves:
+1. Consuming all build-side tuples of a JOIN (by default, the right side) to build an in-memory hash table, and spilling tuples that can't fit into the hash table to a set of partitioned files on disk.
+2. Consuming all probe-side tuples of a JOIN (by default, the left side) and either forwarding probe-build tuple pairs that satisfy the JOIN condition or spilling the candidate probe tuples to another set of partitioned files on disk.
+3. Recursively JOINing the spilled build and probe tuples until all work is exhausted.
+
+_While this hint is available for use with JOINs generated by gSQL++, the current hint grammar does not allow users to describe non-trivial JOINs._
+_To enable hybrid hash JOINs, the recommended approach is to simply disable CBO._
+
+### `+hash-bcast` Hint
+
+While hybrid hash JOIN is a great "default" algorithm for big data with high-cardinality JOINs, it assumes that both the probe and build side of the JOIN do not fit into memory.
+If all build-side tuples (by default, the right side) can fit into memory, then users could choose a potentially faster JOIN algorithm that broadcasts the build side to all partitions instead of distributing the work based on the JOIN key.
+This algorithm is known as broadcast hash JOIN.
+Graphix users can enable this JOIN algorithm by inserting the query hint `+hash-bcast` into the appropriate places of a vertex, edge, or path pattern.
+
+Vertex to Edge 
+: To tell Graphix that the `JOIN` used to connect a vertex and an edge should be evaluated with broadcast hash JOIN, insert the `+hash-bcast` hint immediately before the brackets of an edge (`()-/*+hash-bcast*/[]-()`) or after the brackets of an edge (`()-[]/*+hash-bcast*/-()`).
+
+Correlated Vertex
+: To tell Graphix that the `JOIN` used to connect a correlated vertex from another `MATCH` clause should be evaluated with broadcast hash JOIN, insert the `+hash-bcast` immediately before the closing parentheses of the vertex in the nested `MATCH` clause (`(/*+hash-bcast*/)`).
+
+Example
+:   ```
+    FROM      
+        GRAPH GelpGraph
+            (u1)-[:FRIENDS_WITH]/*+hash-bcast*/->(u2:User)
+    WHERE     
+        NOT EXISTS ( 
+            FROM   
+                GRAPH GelpGraph
+                    (u2/*+hash-bcast*/)<-/*+hash-bcast*/-[:MADE_BY]-(:Review)
+            SELECT 
+                1 
+        )
+    SELECT    
+        u1, 
+        u2
+    LIMIT     
+        1;
+    ```
+
+### `+indexnl` Hint
+
+For analytical queries with many high-degree vertices, using a hash JOIN algorithm makes sense.
+For more interactive queries however (i.e. queries that access a small portion of the graph), the cost of scanning an entire dataset to build a hash table might be too prohibitive.
+If there are indexes built on the JOIN field (either primary indexes or secondary indexes), an alternative JOIN method offered by Graphix is the index nested loop JOIN (INLJ).
 Graphix users can enable this JOIN algorithm by inserting the query hint `+indexnl` into the appropriate places of a vertex, edge, or path pattern.
 
 Vertex to Edge 
@@ -158,12 +259,22 @@ Path Navigation
 
 Example
 :   ```
-    FROM      GRAPH GelpGraph
-    MATCH     (u1:User)-[:FRIENDS_WITH{,5}/*+indexnl*/]->(u2:User),
-              (u2)-[:FRIENDS_WITH]/*indexnl*/->(u3:User)
-    WHERE     NOT EXISTS ( FROM   GRAPH GelpGraph
-                           MATCH  (u3/*+indexnl*/)<-/*+indexnl*/-[:MADE_BY]-(:Review)
-                           SELECT 1 )
-    SELECT    u1, u2, u3
-    LIMIT     1;
+    FROM      
+        GRAPH GelpGraph
+            (u1:User)-[:FRIENDS_WITH{,5}/*+indexnl*/]->(u2:User),
+            (u2)-[:FRIENDS_WITH]/*+indexnl*/->(u3:User)
+    WHERE     
+        NOT EXISTS ( 
+            FROM   
+                GRAPH GelpGraph
+                    (u3/*+indexnl*/)<-/*+indexnl*/-[:MADE_BY]-(:Review)
+            SELECT 
+                1 
+        )
+    SELECT    
+        u1, 
+        u2, 
+        u3
+    LIMIT     
+        1;
     ```

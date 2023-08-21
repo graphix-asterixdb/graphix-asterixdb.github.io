@@ -1,25 +1,13 @@
 ---
 layout: default
 title: Reserved Words
-parent: Language Reference
+parent: Extension Reference
 nav_order: 1000
 ---
 
 # Reserved Words
 {: .no_toc }
 
-
-## Table of Contents
-{: .no_toc .text-delta }
-
-1. TOC
-{: toc }
-
-## Reserved Field Names
-During compilation, Graphix must attach graph-specific schema information to each vertex and edge body.
-As a consequence, the field name `_GraphixSchemaDetail` is reserved by Graphix and an error will be raised if a conflict is found.
-
-## Reserved Keywords
 The following keywords are reserved by both Graphix and SQL++, and cannot be used as unescaped identifiers.
 The keywords in bold are keywords introduced by Graphix:
 

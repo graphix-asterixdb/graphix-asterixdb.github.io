@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Statements
-parent: Language Reference
+parent: Extension Reference
 nav_order: 2
 ---
 
@@ -28,17 +28,15 @@ In Graphix, if users want to create a AsterixDB managed graph whose metadata / n
 CREATE Statement
 {: .text-gamma .fw-500 .lh-0 }
 <p align="center">
-    <img src="../../images/CreateStmt.svg" />
+    <img src="../../images/CreateStmt.svg" height="301" width="227" alt="CREATE Statement Diagram"/>
 </p>
-{: .code-example }
 <br>
 
 CREATE GRAPH Statement
 {: .text-gamma .fw-500 .lh-0 }
 <p align="center">
-    <img src="../../images/CreateGraph.svg" />
+    <img src="../../images/CreateGraph.svg" height="69" width="811" />
 </p>
-{: .code-example }
 <br>
 
 Graph Constructor

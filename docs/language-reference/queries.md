@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Queries
-parent: Language Reference
+parent: Extension Reference
 nav_order: 1
 ---
 

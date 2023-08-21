@@ -26,14 +26,18 @@ If you have a previous AsterixDB instance and want to execute Graphix queries on
 4. AsterixDB should now be up and running with Graphix!
     To quickly verify your Graphix installation, navigate to the query interface at [localhost:19006](https://localhost:19006) and issue the following metadata query:
     ```
-    FROM    `Metadata`.`Graph` AS G,
-            `Metadata`.`GraphDependency` GD,
-            GD.Dependencies D 
-    SELECT  *;
+    FROM    
+        `Metadata`.`Graph` AS G,
+        `Metadata`.`GraphDependency` GD,
+        GD.Dependencies D 
+    SELECT *;
     ```
-    If no errors are raised, then Graphix is sucessfully installed.   
+    If no errors are raised, then Graphix is successfully installed.   
 
 ## Building Graphix + AsterixDB from Source
+
+This process is out-of-date.
+{: .label .label-red }
 
 1. Clone the AsterixDB git repository: [https://github.com/apache/asterixdb](https://github.com/apache/asterixdb).
     ```bash
@@ -52,7 +56,7 @@ If you have a previous AsterixDB instance and want to execute Graphix queries on
     mvn clean package -DskipTests
     ```
 4. AsterixDB should now be packaged (and Graphix installed)!
-    Navigate to binaries folder and start a 1-node AsterixDB cluster with a Graphix configuration file.
+    Navigate to the `bin` folder and start a 1-node AsterixDB cluster with a Graphix configuration file.
     ```bash
     PROJECT_SOURCE=$(pwd)
     cd asterixdb/asterix-server/target/asterix-server-*-SNAPSHOT-binary-assembly/apache-asterixdb-*-SNAPSHOT/bin
@@ -69,10 +73,11 @@ If you have a previous AsterixDB instance and want to execute Graphix queries on
 5. AsterixDB should now be up and running with Graphix!
     To quickly verify your Graphix installation, navigate to the query interface at [localhost:19006](https://localhost:19006) and issue the following metadata query:
     ```
-    FROM    `Metadata`.`Graph` AS G,
-            `Metadata`.`GraphDependency` GD,
-            GD.Dependencies D 
-    SELECT  *;
+    FROM    
+        `Metadata`.`Graph` AS G,
+        `Metadata`.`GraphDependency` GD,
+        GD.Dependencies D 
+    SELECT *;
     ```
     If no errors are raised, then Graphix is successfully installed.
 

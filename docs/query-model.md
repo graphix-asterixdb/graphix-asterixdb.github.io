@@ -21,7 +21,7 @@ A _property graph_ has four defining characteristics that differentiate itself f
   Consequently, given an edge _<u>e</u>_ that connects two vertices we can talk about the _source vertex_ and the _destination vertex_ of _<u>e</u>_.
 - Each graph element is associated with a _label_.
   In the context of the property graph model labels are used to group vertices with other vertices, and edge with other edges.
-- Two pairs of vertices may be connected by more than one edge.
+- More than one edge may connect two pairs of vertices.
 - Each graph element possesses a set of key-value pairs, also known as _properties_.
 
 The property graph model (in contrast to other types of graph models) has received a lot of attention this past decade for its flexibility and ability to express other types of graph models by omitting or re-purposing certain characteristics of the property graph model itself.
@@ -108,7 +108,7 @@ There are four common ways we can determine if a pattern actually maps to an ins
 
 
 ### Navigational Queries (Path Finding)
-Next we'll describe the problem of _path finding_, or finding a path between two vertex instances.
+Next, we'll describe the problem of _path finding_, or finding a path between two vertex instances.
 In contrast to pattern matching, in path finding we _do not_ know the exact pattern between two vertices.
 Instead of describing a pattern, we describe a _path_ to find all valid mappings of our path description to edge instances in our graph.
 When we use regular expressions to describe our paths, we classify our path finding problem as answering _regular path queries_ (RPQs).
@@ -132,7 +132,7 @@ Different systems have different semantics with respect to what paths they consi
 In Graphix, cycles are never considered unless explicitly specified.
 
 {::comment}
-Similar to pattern matching, there are a variety of different semantics when asking "what is a valid path"?
+Similar to pattern matching, there are a variety of different semantics when asking "what is a valid path?".
 There are four common approaches to path finding:
 1. **All path / arbitrary path**
     The least restrictive approach to path query evaluation is to simply consider all paths.
@@ -175,7 +175,15 @@ Navigational pattern matching provides the foundation of most graph query langua
 
 ## Graphix Query Model
 Having described the property graph model and common classes of queries on property graphs, let us now describe the query model for Graphix.
-All gSQL++ queries return ADM (Asterix data model) instances.
+**All** gSQL++ queries return ADM (Asterix data model, a superset of JSON) instances.
+gSQL++ paths in particular refer to a JSON object following the structure below:
+```json
+{
+    "Vertices": [...],
+    "Edges": [...]
+}
+```
+
 With respect to pattern matching semantics, Graphix (by default) will not repeat vertices or edges in a pattern.
 With respect to path finding, Graphix (by default) will consider all paths that do not repeat vertices or edges.
 
