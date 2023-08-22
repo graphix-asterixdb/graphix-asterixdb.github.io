@@ -39,7 +39,7 @@ If you have a previous AsterixDB instance and want to execute Graphix queries on
 {: .warning }
 This process is out-of-date.
 We are currently merging several patches into the main AsterixDB branch that enable recursion.
-For the most up-to-date Graphix, use the pre-built package above.
+For the most up-to-date Graphix, use the pre-built package.
 
 1. Clone the AsterixDB git repository: [https://github.com/apache/asterixdb](https://github.com/apache/asterixdb).
     ```bash
@@ -85,4 +85,26 @@ For the most up-to-date Graphix, use the pre-built package above.
 
 ## Upgrading AsterixDB for Graphix
 
-Coming soon... :-)
+1. Follow either of the sections above ([Using a Pre-Built Package](#using-a-pre-built-package) or [Building Graphix + AsterixDB from Source](#building-graphix--asterixdb-from-source)) to get a new Graphix + AsterixDB package.
+2. Append to your existing cluster configuration file (e.g. `cc.conf`) the sections below:
+    ```
+    [extension/org.apache.asterix.graphix.extension.GraphixQueryTranslatorExtension]
+    graphix.semantics.pattern=isomorphism
+    graphix.semantics.navigation=no-repeat-anything
+    
+    ; We use dummy keys for the extension sections below.
+    [extension/org.apache.asterix.graphix.extension.GraphixLangExtension]
+    enabled=true
+    [extension/org.apache.asterix.graphix.extension.GraphixMetadataExtension]
+    enabled=true    
+    ```
+3. Run your AsterixDB instance using the new binaries and configuration file.
+4. To verify your installation, navigate to the query interface at [localhost:19006](https://localhost:19006) and issue the following metadata query:
+    ```
+    FROM    
+        `Metadata`.`Graph` AS G,
+        `Metadata`.`GraphDependency` GD,
+        GD.Dependencies D 
+    SELECT *;
+    ```
+    If no errors are raised, then Graphix is successfully installed.
