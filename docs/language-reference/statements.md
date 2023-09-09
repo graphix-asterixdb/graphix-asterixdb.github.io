@@ -21,7 +21,7 @@ In addition to queries, gSQL++ needs to support statements for a) managing the d
 ## `CREATE` Statement
 
 The `CREATE` statement is used for creating dataverses and other persistent artifacts within a dataset.
-In Graphix, if users want to create a AsterixDB managed graph whose metadata / name is persisted across requests, they would use the `CREATE GRAPH` statement as opposed to the `DECLARE GRAPH` statement (see below) or an anonymous graph in a `FROM` clause. 
+In Graphix, if users want to create a AsterixDB managed graph whose metadata / name is persisted across requests, they would use the `CREATE GRAPH` statement as opposed to defining a temporary graph using the `WITH GRAPH` clause.
 
 * * *
 
@@ -44,7 +44,7 @@ CREATE GRAPH Statement
 Graph Constructor
 {: .text-gamma .fw-500 .lh-0 }
 <p align="center">
-    <img src="../../images/GraphConstructor.svg" height="112" width="234" alt="Graph Constructor Diagram"/>
+    <img src="../../images/GraphConstructor.svg" height="72" width="254" alt="Graph Constructor Diagram"/>
 </p>
 {: .code-example }
 <br>
@@ -175,32 +175,6 @@ Although vertex and edge patterns are used to specify our graph schema, the foll
 4. The destination vertex of an edge must have exactly one label.
 5. An edge must be directed.
 6. An edge must reference a vertex that is defined within that schema.
-
-## `DECLARE` Statement
-
-In gSQL++, users can `DECLARE` functions _and_ graphs (as opposed to SQL++, where users can only declare functions).
-Declared graphs will only exist within the scope of the current query, and are useful for querying a graph that is specific to one request.
-Declared graphs contrast with graph specified using `CREATE GRAPH`, as declared graphs cannot be referred by other requests and are not managed by AsterixDB.
-Graph lifecycle aside, the syntax for `DECLARE GRAPH` is identical to the syntax for `CREATE GRAPH`, bar the leading keyword.
-
-* * *
-
-DECLARE Statement
-{: .text-gamma .fw-500 .lh-0 }
-<p align="center">
-    <img src="../../images/DeclareStmt.svg" height="72" width="197" alt="DECLARE Statement Diagram"/>
-</p>
-{: .code-example }
-<br>
-
-DECLARE GRAPH Statement
-{: .text-gamma .fw-500 .lh-0 }
-<p align="center">
-    <img src="../../images/DeclareGraph.svg" height="33" width="481" alt="DECLARE GRAPH Diagram"/>
-</p>
-{: .code-example }
-
-* * *
 
 ## `DROP` Statement
 

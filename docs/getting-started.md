@@ -373,7 +373,7 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     ```
     FROM      
         GRAPH Gelp.GelpGraph
-        (u1:User)-[f:FRIENDS_WITH+]->(u2:User)
+            (u1:User)-[f:FRIENDS_WITH+]->(u2:User)
     GROUP BY  
         u1, 
         u2

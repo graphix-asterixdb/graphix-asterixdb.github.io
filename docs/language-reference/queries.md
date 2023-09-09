@@ -64,14 +64,14 @@ For some queries, placing the `SELECT` clause at the end may make a query block 
 
 The purpose of a `FROM` clause is to iterate over a collection, binding a variable to each item in turn.
 Graphix (and gSQL++) do not change the purpose of the `FROM` clause, rather the gSQL++ extension gives users an _additional_ method to specify variable bindings (in the form of vertices, edges, and paths).
-Users are free to interleave the traditional `FromTerm` productions with gSQL++ `FromGraphTerm` productions to express truly synergistic document-based and graph-based queries.
+As shown in the `FromTerm` production, gSQL++ users are free to interleave their graph bindings with existing SQL++ document bindings to express truly synergistic document-based and graph-based queries.
 
 * * *
 
 FROM Clause
 {: .text-gamma .fw-500 .lh-0 }
 <p align="center">
-    <img src="../../images/FromClause.svg" height="112" width="306" alt="FROM Clause Diagram"/>
+    <img src="../../images/FromClause.svg" height="72" width="234" alt="FROM Clause Diagram"/>
 </p>
 {: .code-example }
 <br>
@@ -79,15 +79,7 @@ FROM Clause
 From Term
 {: .text-gamma .fw-500 .lh-0 }
 <p align="center">
-    <img src="../../images/FromTerm.svg" height="103" width="274" alt="From Term Diagram"/>
-</p>
-{: .code-example }
-<br>
-
-From Graph Term
-{: .text-gamma .fw-500 .lh-0 }
-<p align="center">
-    <img src="../../images/FromGraphTerm.svg" height="143" width="765" alt="From Graph Term Diagram"/>
+    <img src="../../images/FromTerm.svg" height="171" width="747" alt="From Term Diagram"/>
 </p>
 {: .code-example }
 <br>
@@ -145,12 +137,12 @@ SELECT
 ```
 
 Putting aside the good practice of specifying explicit iteration variables in SQL++, the problem of specifying graph query patterns in nearly all non-trivial use cases involves describing more than one graph element.
-Consequently, gSQL++ does **not** support implicit iteration variables for `FromGraphTerm`s.
+Consequently, gSQL++ does **not** support implicit iteration variables for variables defined in `MatchExpr` and `MatchStep` productions.
 This lack of support contrasts SQL++, where one-dataset queries are (arguably) more common.
 
 ## `MATCH` Expression
 
-The purpose of a `FromGraphTerm` is to specify a (potentially navigational) graph pattern and introduce all mapping _permutations_ of the graph pattern to the underlying data.
+The purpose of a `PatternExpr` is to specify a (potentially navigational) graph pattern and introduce all mapping _permutations_ of the graph pattern to the underlying data.
 
 * * *
 
@@ -258,8 +250,8 @@ SELECT DISTINCT
     u1;
 ```
 Conceptually, all permutations of both patterns are then joined on their common vertices.
-If a pattern does not share any vertices with any other pattern in that specific `FromGraphTerm`, then we say that our pattern is _disjoint_.
-Disjoint patterns are analogous to cartesian products in SQL: the binding tuple stream after the `FromGraphTerm` contains all possible pairs of the disjoint patterns.
+If a pattern does not share any vertices with any other pattern in that specific `FromTerm`, then we say that our pattern is _disjoint_.
+Disjoint patterns are analogous to cartesian products in SQL: the binding tuple stream after the `FromTerm` contains all possible pairs of the disjoint patterns.
 
 Vertices and edges are the core of all graph queries, but often we may want to reason about our graph at the level of _paths_.
 Paths are a collection of edges, and can be specified in gSQL++ in a similar manner to an edge pattern.
@@ -311,6 +303,70 @@ The flexibility of AsterixDB's data model means that edges in Graphix may not be
 gSQL++ will always work in units of patterns, not individual collections.
 
 _Features such as edge label alternation and negation are planned, but not implemented yet._
+
+## `WITH` Clause
+
+Similar to SQL and SQL++, `WITH` clauses are used to improve the modularity of one's query.
+Typically, a `WITH` clause will contain a subquery whose results will be used elsewhere in the query (although the expression bound with a `WITH` doesn't explicitly have to a QueryBlock production).
+In gSQL++, users can also use a `WITH` clause to define a temporary graph.
+`WITH GRAPH` is the alternative method used to define graphs (compared to `CREATE GRAPH`), and should be used when a graph only needs to be known in the context of a single query.
+
+* * *
+
+WITH Clause
+{: .text-gamma .fw-500 .lh-0 }
+<p align="center">
+    <img src="../../images/WithClause.svg" height="72" width="231" alt="WITH Clause Diagram"/>
+</p>
+{: .code-example }
+<br>
+
+WITH Term
+{: .text-gamma .fw-500 .lh-0 }
+<p align="center">
+    <img src="../../images/WithTerm.svg" height="72" width="425" alt="WITH Term Diagram"/>
+</p>
+{: .code-example }
+
+* * * 
+
+The following example defines a temporary graph called `NewGelpGraph` that reuses the `FRIENDS_WITH` edge definition from `GelpGraph` to add a weight attribute that depends on the number of reviews each user has written.
+```
+WITH
+    GRAPH NewGelpGraph AS
+        VERTEX (:User)
+            PRIMARY KEY (user_id)
+            AS Gelp.Users,
+        EDGE (:User)-[:FRIENDS_WITH]->(:User)
+            SOURCE KEY      (user_id)
+            DESTINATION KEY (friend)
+            AS ( 
+                FROM
+                    GRAPH YelpGraph
+                        (u1:User)-[:KNOWS]->(u2:User),
+                        (u1)-[:MADE]->(r1:Review),
+                        (u2)-[:MADE]->(r2:Review)
+                GROUP BY
+                    u1.user_id,
+                    u2.user_id
+                LET
+                    u1_reviews = COUNT(DISTINCT r1),
+                    u2_reviews = COUNT(DISTINCT r2)
+                SELECT
+                    u1.user_id              AS user_id,
+                    u2.user_id              AS friend,
+                    u1_reviews + u2_reviews AS weight
+            )
+FROM     
+    GRAPH NewGelpGraph
+        (u1:User)-[fw]->(u2:User)
+WHERE
+    fw.weight > 10
+SELECT
+    u1,
+    u2;
+```
+As alluded to in the `GROUP BY` section [here](#group-by-clause), this weight attribute can later be used to define custom attributes on-the-fly to build cheapest-path queries.
 
 ## `LET` Clause
 
