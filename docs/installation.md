@@ -20,7 +20,7 @@ If you have a previous AsterixDB instance and want to execute Graphix queries on
 ## Using a Pre-Built Package
 
 1. Ensure that you have Java 11 installed in your environment.
-2. Download the pre-built Graphix package [here](https://github.com/graphix-asterixdb/package/releases/download/alpha/graphix-0.3.0.zip).
+2. Download the latest pre-built Graphix package [here](https://github.com/graphix-asterixdb/package/releases).
     Unzip this file and open a terminal at the unzipped folder.
 3. Execute the `quickstart.sh` script, which will start a 1-node AsterixDB cluster.
 4. AsterixDB should now be up and running with Graphix!
@@ -37,27 +37,20 @@ If you have a previous AsterixDB instance and want to execute Graphix queries on
 ## Building Graphix + AsterixDB from Source
 
 {: .warning }
-This process is out-of-date.
+This process will change in the future.
 We are currently merging several patches into the main AsterixDB branch that enable recursion.
-For the most up-to-date Graphix, use the pre-built package.
 
-1. Clone the AsterixDB git repository: [https://github.com/apache/asterixdb](https://github.com/apache/asterixdb).
+1. Clone the AsterixDB + Graphix git repository: [https://github.com/graphix-asterixdb/mirror](https://github.com/graphix-asterixdb/mirror).
     ```bash
-    git clone https://github.com/apache/asterixdb.git 
+    git clone https://github.com/graphix-asterixdb/mirror.git graphix-asterixdb
     ```
-2. Navigate to the `asterixdb` folder within the AsterixDB repository and clone the Graphix git repository: [https://github.com/apache/asterixdb-graph](https://github.com/apache/asterixdb-graph).
-    The Graphix repository **must** be within this `asterixdb` folder and **must** be named as `asterix-opt`.
-    ```bash
-    cd asterixdb/asterixdb  
-    git clone https://github.com/apache/asterixdb-graph.git asterix-opt
-    ```
-3. Run the following Maven command to build AsterixDB + Graphix.
+2. Run the following Maven command to build AsterixDB + Graphix.
     This may take a while, so get some coffee!
     ```bash
-    cd asterixdb 
+    cd graphix-asterixdb 
     mvn clean package -DskipTests
     ```
-4. AsterixDB should now be packaged (and Graphix installed)!
+3. AsterixDB should now be packaged (and Graphix installed)!
     Navigate to the `bin` folder and start a 1-node AsterixDB cluster with a Graphix configuration file.
     ```bash
     PROJECT_SOURCE=$(pwd)
@@ -72,7 +65,7 @@ For the most up-to-date Graphix, use the pre-built package.
     # Wait for our 1-node cluster to become active.
     ./asterixhelper wait_for_cluster -timeout 90
     ```
-5. AsterixDB should now be up and running with Graphix!
+4. AsterixDB should now be up and running with Graphix!
     To quickly verify your Graphix installation, navigate to the query interface at [localhost:19006](https://localhost:19006) and issue the following metadata query:
     ```
     FROM    
