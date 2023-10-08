@@ -195,6 +195,14 @@ By default, this setting is disabled (set to `"false"`).
 SET `graphix.evaluation.prefer-indexnl` "true";
 ```
 
+### `compiler.permit.unbounded-all-paths` Setting
+By default, Graphix will forbid the execution of unbounded path queries that it cannot safely reason down from "all-paths" to "any-path" or "cheapest/shortest-path".
+For dense graphs with lots of edges, this default will prevent a large number of results.
+For queries where we are certain that the queried subgraph is spare, we can bypass this default with the `compiler.permit.unbounded-all-paths` setting:
+```
+SET `compiler.permit.unbounded-all-paths` "true";
+```
+
 ### `compiler.lukmemory` Setting
 
 To avoid enumerating all paths, Graphix is able to recognize when a user specifies a query that only requires to know about the existence of some path.

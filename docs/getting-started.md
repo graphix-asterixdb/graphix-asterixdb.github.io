@@ -326,6 +326,7 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     In this scenario, we need to describe a _path_ between two vertices instead of an edge.
     We build the following gSQL++ query:
     ```
+    SET `graphix.compiler.permit.unbounded-all-paths` "true";
     FROM      
         GRAPH Gelp.GelpGraph
             (u1:User)-[f:FRIENDS_WITH+]->(u2:User)
@@ -366,9 +367,10 @@ In this tutorial, we are going to start a 1-node Graphix cluster, establish a co
     
     The query above illustrates a _navigational graph pattern_, where `f` corresponds to a path instead of an edge.
     Vertices of a path are accessed using the `VERTICES` function, and edges of a path are accessed using the `EDGES` function.
+    Note that by default, such paths are disabled in Graphix (and must be explicitly enabled via the `graphix.compiler.permit.unbounded-all-paths` option).
    
 4. The previous query yields a large number of results (too many to display here).
-    Let's expand on the previous scenario: suppose we are not interested in multiple paths between the same two users, but instead we are interested in the _shortest_ path.
+    Let's expand on the previous scenario: suppose we are not interested in all paths between the same two users, but instead we are interested in the _shortest_ path.
     We build the following gSQL++ query, taking advantage of how SQL++ treats grouping:
     ```
     FROM      
