@@ -157,7 +157,7 @@ MATCH Expression (MatchExpr)
 Pattern Expression (PatternExpr)
 {: .text-gamma .fw-500 .lh-0 }
 <p align="center">
-    <img src="../../images/MatchExpr.svg" height="72" width="173" alt="Pattern Expression Diagram"/>
+    <img src="../../images/PatternExpr.svg" height="125" width="207" alt="Pattern Expression Diagram"/>
 </p>
 {: .code-example }
 <br>
